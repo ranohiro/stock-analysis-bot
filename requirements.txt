@@ -23,3 +23,6 @@ google-generativeai
 
 # Creatin Analist Reopot
 reportlab
+
+# JP calender
+jpholiday

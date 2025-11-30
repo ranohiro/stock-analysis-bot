@@ -15,3 +15,6 @@ images/
 venv/
 env/
 .venv/
+
+# データベース
+data/stock_data.db

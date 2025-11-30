@@ -1,40 +1,29 @@
 import sqlite3
 import os
-from contextlib import contextmanager
+from datetime import datetime
 
-# データベースファイルのパス
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'stock_data.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'stock_data.db')
 
-@contextmanager
 def get_connection():
-    """データベース接続を管理するコンテキストマネージャ"""
-    # dataディレクトリがない場合は作成
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        yield conn
-    finally:
-        conn.close()
+    """SQLite接続オブジェクトを返す"""
+    return sqlite3.connect(DB_PATH)
 
-def init_db():
-    """データベースとテーブルの初期化"""
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        
-        # 1. 銘柄マスタテーブル (企業情報)
-        cursor.execute('''
+def create_tables(conn: sqlite3.Connection):
+    """データベーステーブルを定義し、作成する"""
+    cursor = conn.cursor()
+
+    # 1. 銘柄マスタ (companies):
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS companies (
             code TEXT PRIMARY KEY,
             name TEXT,
             market TEXT,
             industry TEXT
-        )
-        ''')
+        );
+    """)
 
-        # 2. 日足株価テーブル (Daily Prices)
-        # 週足チャートはここからプログラム側で集計して作成します
-        cursor.execute('''
+    # 2. 日足株価 (daily_prices):
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS daily_prices (
             code TEXT,
             date TEXT,
@@ -42,54 +31,72 @@ def init_db():
             high REAL,
             low REAL,
             close REAL,
-            volume INTEGER,
+            volume REAL,
+            trading_value REAL,
+            market_cap_total REAL,
             PRIMARY KEY (code, date)
-        )
-        ''')
-        
-        # 3. 財務・指標テーブル (Financials)
-        cursor.execute('''
+        );
+    """)
+
+    # 3. 日足財務指標 (daily_financials): 拡張カラムを追加
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS daily_financials (
             code TEXT,
             date TEXT,
-            market_cap REAL,      -- 時価総額
-            per_forecast REAL,    -- 予想PER
-            pbr_actual REAL,      -- 実績PBR
-            eps_forecast REAL,    -- 予想EPS
-            bps_actual REAL,      -- 実績BPS
-            dividend_yield REAL,  -- 配当利回り
+            market_cap REAL,
+            shares_outstanding REAL,
+            per_forecast REAL,
+            pbr_actual REAL,
+            eps_forecast REAL,
+            bps_actual REAL,
+            dividend_yield REAL,
+            min_investment REAL,
             PRIMARY KEY (code, date)
-        )
-        ''')
+        );
+    """)
 
-        # 4. 信用残テーブル (Margin Trading)
-        # 株・プラス: tosho-stock-margin-transactions-2
-        cursor.execute('''
+    # 4. 週次信用残 (weekly_margin):
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS weekly_margin (
             code TEXT,
             date TEXT,
-            sell_balance INTEGER, -- 売り残
-            buy_balance INTEGER,  -- 買い残
-            ratio REAL,           -- 信用倍率
+            sell_balance_total REAL,
+            buy_balance_total REAL,
+            ratio REAL,
+            sell_balance_ins REAL,   -- 制度信用
+            buy_balance_ins REAL,    -- 制度信用
+            sell_balance_gen REAL,   -- 一般信用
+            buy_balance_gen REAL,    -- 一般信用
+            PRIMARY KEY (code, date)
+        );
+    """)
+
+    #　5. 指標データ (sector・index):
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_indices (
+            code TEXT NOT NULL,
+            name TEXT,
+            date TEXT NOT NULL,
+            close REAL,                 -- 終値
+            change_ratio REAL,          -- 前日比（％）
+            market_cap_index REAL,      -- 時価総額（指数用・浮動株ベース）
+            volume REAL,                -- 売買単位換算後株式数 (指標の出来高に相当)
+            銘柄数 INTEGER,             -- 銘柄数
             PRIMARY KEY (code, date)
         )
-        ''')
-        
-        # 5. 価格帯別出来高テーブル - Volume Profile Cache
-        # 特定期間（例：過去1年）における出来高の分布をキャッシュ
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS volume_profile (
-            code TEXT,
-            analysis_date TEXT,     -- 計算実行日
-            price_band REAL,        -- 価格帯
-            volume_sum INTEGER,     -- その価格帯で取引された総出来高
-            PRIMARY KEY (code, analysis_date, price_band)
-        )
-        ''')
-        
-        conn.commit()
-        print(f"✅ Database initialized at: {DB_PATH}")
+    """)
+    conn.commit()
+    print("✅ Tables created/verified successfully.")
+
+def initialize_db():
+    """データベースファイルを初期化し、テーブルを作成する"""
+    if not os.path.exists(os.path.dirname(DB_PATH)):
+        os.makedirs(os.path.dirname(DB_PATH))
+    
+    with get_connection() as conn:
+        create_tables(conn)
+    print(f"✅ Database initialized at: {DB_PATH}")
 
 if __name__ == '__main__':
-    # 直接実行された場合はDBを初期化
-    init_db()
+    initialize_db()
+
