@@ -378,8 +378,8 @@ def run_daily_batch(start_date_str: str, end_date_str: str):
         print("\n=== ✅ 全処理完了 ===")
 
 if __name__ == '__main__':
-    # 確認のため、直近3日分だけ実行してデータが正しいか確認してください
+    # 直近30日分のデータを取得（欠落データの補完用）
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=400)
+    start_date = end_date - timedelta(days=30)
     
     run_daily_batch(start_date.strftime('%Y%m%d'), end_date.strftime('%Y%m%d'))
