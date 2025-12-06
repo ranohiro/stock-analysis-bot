@@ -46,15 +46,10 @@ async def on_message(message):
                     
                 company = analysis_data["company_name"]
                 
-                # --- 2. グラフ生成・送信フェーズ ---
-                await message.channel.send(f"### ✅ データ取得成功: {company} ({code})\n\n📈 グラフを生成しています。お待ちください...")
+                # --- 2. グラフ生成フェーズ ---
+                await message.channel.send(f"### ✅ データ取得成功: {company} ({code})")
                     
                 chart_info = generate_charts(analysis_data['stock_data'], code)
-                    
-                await message.channel.send(
-                    content=f"**[{code}] ローソク足＆RSIチャート** (直近3ヶ月)",
-                    file=discord.File(chart_info['file'], filename=chart_info['filename'])
-                )
 
                 # --- 3. AI分析フェーズ ---
                 await message.channel.send("🧠 **Gemini AIによる詳細分析を開始します...**")
@@ -72,14 +67,34 @@ async def on_message(message):
                     await message.channel.send(f"AI分析エラー: {analysis_result['error']}")
                     return
 
-                # AIレポートをDiscordに送信
-                await message.channel.send(analysis_result['report'])
+                # AIレポートをPDFに変換して送信
+                from src.pdf_generator import generate_pdf_report
+                
+                pdf_buffer = generate_pdf_report(
+                    company_name=company,
+                    code=code,
+                    current_price=analysis_data['stock_data']['Close'].iloc[-1],
+                    summary=analysis_data['company_summary'],
+                    stock_data=analysis_data['stock_data'],
+                    financial_data=analysis_data['financial_data'],
+                    chart_image_buffer=chart_info['file'],
+                    ai_analysis=analysis_result['report']
+                )
+                
+                # PDFファイルをDiscordに送信
+                await message.channel.send(
+                    content=f"✅ **{company} ({code})** の分析レポートを生成しました。",
+                    file=discord.File(pdf_buffer, filename=f"{code}_analysis_report.pdf")
+                )
                                         
             except IndexError:
                 await message.channel.send('エラー: 証券コードを入力してください。例: `/analyze 7203`')
             except Exception as e:
-                # その他の予期せぬエラー
-                await message.channel.send(f'予期せぬエラーが発生しました: {e}')
+                # その他の予期せぬエラー（エラーメッセージを2000文字以内に制限）
+                error_msg = str(e)
+                if len(error_msg) > 1800:
+                    error_msg = error_msg[:1800] + '...(省略)'
+                await message.channel.send(f'予期せぬエラーが発生しました: {error_msg}')
 
 if TOKEN:
     client.run(TOKEN)

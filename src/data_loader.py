@@ -2,18 +2,16 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from src.db_manager import get_company_info, get_stock_prices, get_financial_data
 
 # .envから株・プラスの認証情報を取得
 load_dotenv()
 KABU_PLUS_USER = os.getenv('KABU_PLUS_USER')
 KABU_PLUS_PASSWORD = os.getenv('KABU_PLUS_PASSWORD')
 
-# NOTE: 実際にはここに株・プラスのAPI接続ロジックが入ります。
-#       以下の関数は、一旦ダミーのデータ（Pandas DataFrame）を返すように記述しています。
-
 def fetch_data(code: str) -> dict:
     """
-    指定された証券コードに基づき、株価、財務、需給データを取得する（ダミー関数）。
+    指定された証券コードに基づき、株価、財務、需給データを取得する。
     
     Args:
         code: 証券コード (例: '7203')
@@ -25,40 +23,43 @@ def fetch_data(code: str) -> dict:
     if not KABU_PLUS_USER or not KABU_PLUS_PASSWORD:
         return {"error": "株plusの認証情報が設定されていません。"}
         
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 株・プラス認証情報確認: OK. 証券コード {code} のデータ取得を開始します。")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 証券コード {code} のデータ取得を開始します。")
 
-    # --- 1. ダミーの株価データ (テクニカル分析用) ---
+    # --- 1. 企業情報を取得 ---
+    company_info = get_company_info(code)
+    
+    if not company_info:
+        return {"error": f"証券コード {code} は見つかりませんでした。データベースを確認してください。"}
+    
+    # --- 2. 株価データを取得（直近1年分） ---
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365)
     
-    dates = pd.date_range(start=start_date, end=end_date, freq='D')
-    dummy_prices = [1500 + i % 100 + (i // 5) * 5 for i, _ in enumerate(dates)]
+    stock_data = get_stock_prices(
+        code=code,
+        start_date=start_date.strftime('%Y%m%d'),
+        end_date=end_date.strftime('%Y%m%d')
+    )
     
-    stock_data = pd.DataFrame({
-        'Date': dates,
-        'Open': dummy_prices,
-        'High': [p + 10 for p in dummy_prices],
-        'Low': [p - 10 for p in dummy_prices],
-        'Close': [p + 5 for p in dummy_prices],
-        'Volume': [10000 + i * 100 for i, _ in enumerate(dates)]
-    }).set_index('Date').dropna()
+    if stock_data.empty:
+        return {"error": f"証券コード {code} の株価データが見つかりませんでした。"}
     
-    # --- 2. ダミーの財務データ (ファンダメンタル分析用) ---
-    financial_data = {
-        'year': [2021, 2022, 2023, 2024, 2025],
-        'sales': [5000, 5500, 6200, 6800, 7500],
-        'op_profit': [450, 500, 580, 650, 720],
-        'net_profit': [300, 350, 400, 480, 550],
-        'eps': [120, 140, 160, 190, 220],
-        'per': [15.0, 14.5, 16.0, 13.5, 12.0],
-        'roe': [10.5, 11.2, 12.0, 12.8, 13.5]
-    }
+    # --- 3. 財務データを取得（最新5件） ---
+    financial_data = get_financial_data(code=code, limit=5)
+    
+    if financial_data.empty:
+        print(f"[警告] 証券コード {code} の財務データが見つかりませんでした。")
+        # 財務データが無くても続行（株価データはある）
+        financial_data = pd.DataFrame()
+    
+    # --- 4. 企業概要（簡易版） ---
+    company_summary = f"{company_info['name']}は{company_info['industry']}業界に属する企業です。"
     
     return {
         "stock_data": stock_data,
-        "financial_data": pd.DataFrame(financial_data),
-        "company_name": f"銘柄コード {code} のダミー企業",
-        "company_summary": "この企業は〇〇事業を主軸とし、特に海外展開に強みがあります。",
+        "financial_data": financial_data,
+        "company_name": company_info['name'],
+        "company_summary": company_summary,
         "error": None
     }
 
@@ -71,6 +72,7 @@ if __name__ == '__main__':
         print(data['stock_data'].tail())
         print("\n--- 財務データ ---")
         print(data['financial_data'])
+        print(f"\n--- 企業名 ---")
+        print(data['company_name'])
     else:
         print(data['error'])
-
