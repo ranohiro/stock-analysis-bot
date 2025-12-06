@@ -1,10 +1,10 @@
 name: Daily Stock Data Update
 
-# 毎日午前2時（日本時間）に自動実行
-# GitHub Actionsは UTC で動作するため、17時（前日）= 翌日午前2時（JST）
+# 毎日午後5時（日本時間）に自動実行
+# GitHub Actionsは UTC で動作するため、8時（UTC）= 17時（JST）
 on:
   schedule:
-    - cron: '0 17 * * *'  # 毎日17:00 UTC = 翌2:00 JST
+    - cron: '0 8 * * *'  # 毎日8:00 UTC = 17:00 JST
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
