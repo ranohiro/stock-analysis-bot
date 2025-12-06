@@ -18,3 +18,9 @@ env/
 
 # データベース
 data/stock_data.db
+
+# 開発用デバッグ出力（チャート画像・PDFテスト）
+debug/
+
+# テスト出力フォルダ
+output/

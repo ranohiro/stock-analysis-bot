@@ -76,7 +76,7 @@ def test_pdf_generation(code: str):
         )
         
         # --- 5. ファイル保存 ---
-        output_dir = os.path.join(os.path.dirname(__file__), 'output')
+        output_dir = os.path.join(os.path.dirname(__file__), 'debug', 'pdfs')
         os.makedirs(output_dir, exist_ok=True)
         
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
