@@ -9,9 +9,6 @@ numpy
 matplotlib
 mplfinance
 
-# Technical Analysis (TA) library
-pandas-ta
-
 # Environment and Utility
 python-dotenv
 requests

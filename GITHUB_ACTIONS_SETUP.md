@@ -1,235 +1,259 @@
-# GitHub Actions による自動データ更新セットアップガイド
+# GitHub Actions セットアップ - 実行ガイド
 
-## 🎯 概要
-
-GitHub Actionsを使用することで、**Macがスリープ状態でも確実にデータを更新**できます。
-
-### メリット
-
-- ✅ Macのスリープ状態に関係なく動作
-- ✅ クラウド環境で確実に実行
-- ✅ 実行履歴とログの確認が容易
-- ✅ 無料枠で十分に対応可能（月2,000分）
-- ✅ 手動実行も可能
+このドキュメントは、GitHub Actionsによる自動データ更新を実際に稼働させるための手順書です。
 
 ---
 
-## 📋 セットアップ手順
+## 📋 前提条件
 
-### ステップ1: Git LFSのインストール
+- [x] GitHubアカウントを持っている
+- [x] プロジ​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​ェクトをGitHubリポジトリにプッシュ済み（またはこれから行う）
+- [x] 株・プラスのユーザー名とパスワードを把握している
+- [x] Gemini APIキーを把握している
 
-データベースファイル（185MB）を効率的に管理するため、Git LFSを使用します。
+---
 
-```bash
-# Homebrewでインストール（macOS）
-brew install git-lfs
+## ステップ1: 変更をGitHubにプッシュ
 
-# Git LFSを有効化
-git lfs install
-```
-
-### ステップ2: リポジトリにGit LFSを設定
+### 1-1. 変更ファイルを確認
 
 ```bash
 cd /Users/hiranotakahiro/Projects/個別株分析
-
-# 既存のデータベースをGit LFSで追跡
-git lfs track "*.db"
-git lfs track "*.sqlite"
-
-# .gitattributesをコミット
-git add .gitattributes
-git commit -m "chore: configure Git LFS for database files"
+git status
 ```
 
-### ステップ3: データベースをリポジトリに追加
+### 1-2. 必要なファイルを追加
 
 ```bash
-# データベースファイルを追加
-git add data/stock_data.db
-
-# コミット
-git commit -m "chore: add initial stock database"
-
-# プッシュ（初回は時間がかかる場合があります）
-git push origin main
-```
-
-### ステップ4: GitHubにSecretsを設定
-
-GitHub Actionsで認証情報を安全に使用するため、Secretsを設定します。
-
-1. GitHubリポジトリのページを開く
-2. **Settings** → **Secrets and variables** → **Actions** をクリック
-3. **New repository secret** をクリックし、以下を追加：
-
-| Secret名 | 値 |
-|----------|-----|
-| `KABU_PLUS_USER` | 株・プラスのユーザー名 |
-| `KABU_PLUS_PASSWORD` | 株・プラスのパスワード |
-| `GEMINI_API_KEY` | Google Gemini APIキー |
-
-### ステップ5: GitHub Actionsワークフローをプッシュ
-
-```bash
-# ワークフローファイルを追加
+# GitHub Actionsワークフロー
 git add .github/workflows/daily-data-update.yml
 
-# コミット
-git commit -m "feat: add GitHub Actions workflow for daily data updates"
+# 修正した依存関係ファイル
+git add requirements.txt
 
-# プッシュ
+# ドキュメント
+git add GITHUB_ACTIONS_SETUP.md
+git add AUTOMATION_SETUP.md
+
+# その他の新規ファイル（必要に応じて）
+git add run_batch_update.sh
+```
+
+### 1-3. コミット
+
+```bash
+git commit -m "feat: add GitHub Actions automation for daily data updates
+
+- Add GitHub Actions workflow for daily stock data updates
+- Remove unused pandas-ta dependency
+- Update Python version to 3.11 for compatibility
+- Disable launchd in favor of GitHub Actions
+- Add comprehensive setup documentation"
+```
+
+### 1-4. プッシュ
+
+```bash
 git push origin main
 ```
 
 ---
 
-## 🧪 動作確認
+## ステップ2: GitHub Secretsの設定
 
-### 手動でワークフローを実行
+### 2-1. GitHubリポジトリページを開く
 
-1. GitHubリポジトリの **Actions** タブを開く
-2. 左側のワークフロー一覧から **Daily Stock Data Update** を選択
-3. **Run workflow** ボタンをクリック
-4. ブランチを選択して **Run workflow** を実行
+ブラウザで以下にアクセス：
+```
+https://github.com/<あなたのユーザー名>/stock-analysis-bot
+```
 
-### 実行ログの確認
+### 2-2. Settingsタブに移動
 
-1. Actions タブでワークフロー実行をクリック
-2. 各ステップのログを確認
-3. "Verify database update" ステップでデータベース統計を確認
+1. リポジトリページ上部の **Settings** タブをクリック
+2. 左サイドバーの **Secrets and variables** → **Actions** をクリック
+
+### 2-3. Secretsを追加
+
+**New repository secret** ボタンをクリックし、以下の3つを登録：
+
+#### Secret 1: KABU_PLUS_USER
+
+- **Name**: `KABU_PLUS_USER`
+- **Secret**: 株・プラスのユーザー名
+- **Save secret** をクリック
+
+#### Secret 2: KABU_PLUS_PASSWORD
+
+- **Name**: `KABU_PLUS_PASSWORD`
+- **Secret**: 株・プラスのパスワード
+- **Save secret** をクリック
+
+#### Secret 3: GEMINI_API_KEY
+
+- **Name**: `GEMINI_API_KEY`
+- **Secret**: Google Gemini APIキー（`.env`ファイルから取得）
+- **Save secret** をクリック
+
+### 2-4. 設定完了の確認
+
+**Repository secrets** セクションに以下の3つが表示されていることを確認：
+
+- ✅ `GEMINI_API_KEY`
+- ✅ `KABU_PLUS_PASSWORD`
+- ✅ `KABU_PLUS_USER`
 
 ---
 
-## 📊 実行スケジュール
+## ステップ3: ワークフローの手動テスト実行
 
-- **実行時刻**: 毎日午前2時（日本時間）
-  - GitHub ActionsはUTCで動作するため、17:00 UTC = 翌日2:00 JST
-- **実行内容**: 直近30日分のデータを取得・更新
-- **データ保存**:
-  - GitHub Artifactsに90日間保持
-  - Git LFSでリポジトリにコミット
+### 3-1. Actionsタブに移動
+
+1. リポジトリページ上部の **Actions** タブをクリック
+2. 左サイドバーから **Daily Stock Data Update** を選択
+
+### 3-2. 手動実行
+
+1. 右側の **Run workflow** ボタンをクリック
+2. ブランチ（通常は `main`）を選択
+3. 緑色の **Run workflow** ボタンをクリック
+
+### 3-3. 実行状況を確認
+
+1. ワークフロー実行が開始されます（黄色のアイコン🟡）
+2. クリックして詳細ページに移動
+3. 各ステップの実行状況をリアルタイムで確認できます
+
+### 3-4. 期待される結果
+
+すべてのステップが緑色のチェックマーク✅で完了すること：
+
+```
+✅ Checkout repository
+✅ Set up Python
+✅ Install dependencies
+✅ Download latest database (初回は失敗OK)
+✅ Create database if not exists
+✅ Run batch data update
+✅ Verify database update
+✅ Upload updated database
+```
+
+**"Verify database update"** の出力例：
+```
+=== データベース統計 ===
+企業数: 3911
+最新データ: 20251206
+データ期間: 268日分
+```
 
 ---
 
-## 🔄 データベースの取得方法
+## ステップ4: Artifactの確認
 
-GitHub Actionsで更新されたデータベースをローカルに取得する方法：
+### 4-1. Artifactsセクションを確認
 
-### 方法1: Gitからプル（推奨）
+ワークフロー実行ページの下部に **Artifacts** セクションがあります。
+
+### 4-2. データベースをダウンロード（オプション）
+
+1. `stock-database` をクリックしてダウンロード
+2. ZIPファイルを解凍
+3. `stock_data.db` を確認
+
+---
+
+## ステップ5: 定期実行の確認（翌日）
+
+### 5-1. 待機
+
+翌日の午前2時（日本時間）以降まで待ちます。
+
+### 5-2. Actionsタブで確認
+
+1. GitHubの **Actions** タブを開く
+2. 自動実行されたワークフローを確認
+3. 実行が成功していることを確認（緑色のチェックマーク✅）
+
+---
+
+## 🎉 完了！
+
+すべてのステップが成功すれば、以下が実現されます：
+
+- ✅ 毎日午前2時に自動的にデータが更新される
+- ✅ Macがスリープ状態でも確実に実行される
+- ✅ 実行履歴とログがGitHub上で確認できる
+- ✅ データベースは90日間保持される
+
+---
+
+## 📊 日常的な使い方
+
+### ローカルで最新データを使う方法
+
+#### 方法1: GitHub Artifactからダウンロード
+
+1. GitHubの **Actions** タブを開く
+2. 最新のワークフロー実行をクリック
+3. **Artifacts** から `stock-database` をダウンロード
+4. 解凍して `data/stock_data.db` に配置
+
+#### 方法2: 手動でバッチを実行
 
 ```bash
 cd /Users/hiranotakahiro/Projects/個別株分析
-git pull origin main
-```
-
-Git LFSが有効化されていれば、データベースも自動的にダウンロードされます。
-
-### 方法2: GitHub Artifactsからダウンロード
-
-1. GitHubリポジトリの **Actions** タブを開く
-2. 最新のワークフロー実行をクリック
-3. **Artifacts** セクションから `stock-database` をダウンロード
-4. ZIPを解凍して `data/` ディレクトリに配置
-
----
-
-## 🆚 launchdとの比較
-
-| 項目 | launchd（ローカル） | GitHub Actions |
-|------|-------------------|----------------|
-| 実行場所 | Mac本体 | GitHub クラウド |
-| スリープ時 | ❌ 実行されない | ✅ 実行される |
-| 実行確認 | ログファイル確認が必要 | Web UIで簡単に確認 |
-| 無料枠 | 制限なし | 月2,000分（十分） |
-| セットアップ | ローカル設定のみ | GitHubリポジトリが必要 |
-
-### 推奨構成
-
-**両方を併用する**ことで、最も確実な運用が可能です：
-
-- **平日**: GitHub Actionsで確実に実行
-- **バックアップ**: launchdがローカルでも実行（Macが起動している場合）
-
-重複実行を避けるため、launchdを無効化することも可能：
-
-```bash
-launchctl unload ~/Library/LaunchAgents/com.stockanalysis.batchupdate.plist
+./run_batch_update.sh
 ```
 
 ---
 
-## ⚠️ 注意事項
-
-### Git LFSの制限
-
-- **無料枠**: 1GB ストレージ、1GB/月 帯域幅
-- **現在の使用量**: データベース約185MB
-- **6ヶ月後の想定**: 約1GB（問題なし）
-
-### GitHub Actionsの実行時間
-
-- **無料枠**: 月2,000分（パブリックリポジトリは無制限）
-- **1回の実行時間**: 約5〜10分
-- **月間実行回数**: 30回（毎日1回）
-- **月間使用時間**: 150〜300分（余裕あり）
-
-### プライベートリポジトリの場合
-
-認証情報を含むため、リポジトリは**プライベート**にすることを推奨します。
-
----
-
-## 🔧 トラブルシューティング
-
-### データベースのマージ競合
-
-複数の場所（ローカル、GitHub Actions）でデータベースを更新すると競合が発生する可能性があります。
-
-**解決策**:
-
-```bash
-# GitHub Actionsの更新を優先する場合
-git fetch origin main
-git reset --hard origin/main
-git lfs pull
-```
+## ⚠️ トラブルシューティング
 
 ### ワークフローが失敗する
 
-1. Actions タブでエラーログを確認
-2. Secretsが正しく設定されているか確認
-3. 株・プラスの認証情報が有効か確認
+1. **Actions** タブで失敗したワークフローをクリック
+2. 赤い❌マークのステップをクリックしてエラーログを確認
+3. よくあるエラー：
+   - **認証エラー**: Secretsが正しく設定されているか確認
+   - **404エラー**: 株・プラスのデータが公開されていない日（休日など）
+
+### データが更新されない
+
+1. ワークフローが実行されているか確認（**Actions** タブ）
+2. 実行が成功しているか確認（緑色✅）
+3. "Verify database update" のログで最新日付を確認
+
+### メール通知を受け取りたい
+
+1. GitHubアカウントの **Settings** → **Notifications**
+2. **Actions** セクションで通知設定を有効化
 
 ---
 
-## 📈 今後の拡張案
+## 🔄 launchdとの比較
 
-1. **Discord通知**: ワークフロー完了時にDiscordへ通知
-2. **エラー通知**: 失敗時のみアラート送信
-3. **週次レポート**: 毎週末に統計レポートを生成
-4. **複数地域**: 異なる時間帯で実行して冗長性を確保
+| 項目 | launchd | GitHub Actions |
+|------|---------|----------------|
+| 実行場所 | Mac本体 | GitHubクラウド |
+| スリープ時 | ❌ 実行されない | ✅ 実行される |
+| 無料枠 | 無制限 | 月2,000分 |
+| 現在の状態 | **無効化済み** | **✅ 有効** |
 
----
+launchdを再度有効化したい場合：
 
-## ✅ セットアップチェックリスト
-
-- [ ] Git LFSのインストール
-- [ ] `.gitattributes`の設定
-- [ ] データベースのGit LFS追跡
-- [ ] GitHubにSecretsを設定
-- [ ] ワークフローファイルのプッシュ
-- [ ] 手動実行でテスト
-- [ ] 定期実行の確認（翌日）
+```bash
+launchctl load ~/Library/LaunchAgents/com.stockanalysis.batchupdate.plist
+```
 
 ---
 
-## 🎉 完了後の確認
+## 📝 次のステップ
 
-セットアップ完了後、翌日の午前2時以降に以下を確認してください：
+GitHub Actionsが正常に動作することを確認したら、次は：
 
-1. **GitHub Actions**: 実行が成功しているか
-2. **データベース**: 最新データが更新されているか
-3. **Artifacts**: データベースがアップロードされているか
+1. **Discord Botの起動** （優先度2）
+2. `/analyze 7203` などでテスト実行
+3. 最新データを使ったPDFレポート生成を確認
 
-すべて正常であれば、Macがスリープ状態でも毎日自動的にデータ更新が行われます！
+お疲れ様でした！🎉

@@ -14,13 +14,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        lfs: true  # Git LFSを有効化（データベースファイル用）
     
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.11'
         cache: 'pip'
     
     - name: Install dependencies
@@ -66,12 +64,3 @@ jobs:
         name: stock-database
         path: data/stock_data.db
         retention-days: 90  # 90日間保持
-    
-    - name: Commit and push database (Git LFS)
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add data/stock_data.db
-        git commit -m "chore: update stock database - $(date +'%Y-%m-%d')" || echo "No changes to commit"
-        git push
-      continue-on-error: true  # プッシュ失敗時も処理を継続
