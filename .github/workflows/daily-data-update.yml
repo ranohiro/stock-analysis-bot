@@ -48,7 +48,7 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
       run: |
         echo "=== バッチ処理開始 ==="
-        python src/batch_loader.py
+        python src/core/batch_loader.py
         echo "=== バッチ処理完了 ==="
     
     - name: Verify database update

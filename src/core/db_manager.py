@@ -2,7 +2,7 @@ import sqlite3
 import os
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'stock_data.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data', 'stock_data.db')
 
 def get_connection():
     """SQLite接続オブジェクトを返す"""
@@ -219,7 +219,51 @@ def get_financial_data(code: str, limit: int = 5):
             })
         
         return df
+    
+def get_margin_balance(code: str, limit: int = 26):
+    """
+    信用残データを取得する（最新のN件）
+    デフォルトは半年分（約26週）
+    
+    Args:
+        code: 証券コード
+        limit: 取得件数
+        
+    Returns:
+        pandas.DataFrame: 信用残データ
+    """
+    import pandas as pd
+    
+    with get_connection() as conn:
+        # sell_balance_ins: 制度信用売残（機関の空売りを含むことが多い）
+        query = """
+            SELECT date, sell_balance_total, buy_balance_total, ratio,
+                   sell_balance_ins, buy_balance_ins
+            FROM weekly_margin
+            WHERE code = ?
+            ORDER BY date DESC
+            LIMIT ?
+        """
+        
+        df = pd.read_sql_query(query, conn, params=[code, limit])
+        
+        if not df.empty:
+            # 日付をDatetimeに変換
+            df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+            # 最新順から古い順に並べ替え
+            df = df.sort_values('date')
+            df = df.rename(columns={
+                'date': 'Date',
+                'sell_balance_total': 'Sell_Balance',
+                'buy_balance_total': 'Buy_Balance',
+                'ratio': 'Ratio',
+                'sell_balance_ins': 'Sell_Balance_Ins',  # 制度信用売残
+                'buy_balance_ins': 'Buy_Balance_Ins'     # 制度信用買残
+            })
+            # インデックス設定
+            df = df.set_index('Date')
+        
+        return df
 
-if __name__ == '__main__':
     initialize_db()
 

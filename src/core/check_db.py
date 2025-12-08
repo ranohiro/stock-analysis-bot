@@ -5,7 +5,7 @@ import sys
 
 # srcモジュールをインポートできるようにパスを追加
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from src.db_manager import get_connection
+from src.core.db_manager import get_connection
 
 def check_db():
     conn = get_connection()

@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from src.db_manager import get_company_info, get_stock_prices, get_financial_data
+from src.core.db_manager import get_company_info, get_stock_prices, get_financial_data, get_margin_balance
 
 # .envから株・プラスの認証情報を取得
 load_dotenv()
@@ -44,20 +44,24 @@ def fetch_data(code: str) -> dict:
     if stock_data.empty:
         return {"error": f"証券コード {code} の株価データが見つかりませんでした。"}
     
-    # --- 3. 財務データを取得（最新5件） ---
-    financial_data = get_financial_data(code=code, limit=5)
+    # --- 3. 財務データを取得（過去1年分） ---
+    financial_data = get_financial_data(code=code, limit=252)
     
     if financial_data.empty:
         print(f"[警告] 証券コード {code} の財務データが見つかりませんでした。")
         # 財務データが無くても続行（株価データはある）
         financial_data = pd.DataFrame()
+        
+    # --- 4. 信用残データを取得（過去1年分=約52週） ---
+    margin_data = get_margin_balance(code=code, limit=52)
     
-    # --- 4. 企業概要（簡易版） ---
+    # --- 5. 企業概要（簡易版） ---
     company_summary = f"{company_info['name']}は{company_info['industry']}業界に属する企業です。"
     
     return {
         "stock_data": stock_data,
         "financial_data": financial_data,
+        "margin_data": margin_data,
         "company_name": company_info['name'],
         "company_summary": company_summary,
         "error": None

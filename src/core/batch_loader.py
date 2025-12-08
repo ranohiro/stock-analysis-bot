@@ -9,7 +9,7 @@ import time
 import jpholiday
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from src.db_manager import get_connection
+from src.core.db_manager import get_connection
 from typing import Union
 
 # .envファイルを読み込み

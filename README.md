@@ -1,105 +1,65 @@
-# Stock Analysis AI Bot (Discord版)
+# Japanese Stock Analysis Bot (Discord Integration)
 
-## プロジェクト概要
-ユーザーが入力した証券コードに基づき、個別銘柄の多角的な分析レポート（ファンダメンタル・テクニカル・需給・企業概要）を **PDFファイルとして自動生成**し、Discord上で提供するAIチャットボットである。
+## 📌 プロジェクト概要
+Discord上で動作する日本株分析Botです。
+ユーザーが `/analyze [証券コード]` コマンドを送信すると、対象銘柄の**「企業概要」「テクニカルチャート」「需給分析」**を1枚のPDFレポートにまとめて返信します。
+Oracle Cloud等の常時稼働サーバー（Docker運用）での動作を想定しています。
 
-膨大な財務・需給データを扱うため、バックグラウンドでデータベースを構築し、高速な応答と深い分析を両立させるアーキテクチャを採用している。
+## 🎯 最終成果物 (Output)
+**A4サイズ PDFレポート構成**
+1.  **上段: 企業概要 (AI Summary)**
+    *   Gemini APIを使用し、企業のビジネスモデル、直近のトピック、業績概要を簡潔にまとめたテキスト。
+2.  **中段: テクニカル分析チャート (Visual)**
+    *   ローソク足（6ヶ月）、移動平均線（5日/25日）、出来高、価格帯別出来高。
+3.  **下段: 需給分析ダッシュボード (Supply-Demand)**
+    *   信用残推移、セクター比較、需給スコアレーダーチャート、各種需給指標。
 
----
-
-## アーキテクチャ構成
-
-
-
-本システムは「常駐型ボット」と「定期実行バッチ」の2つのプロセスで構成される。
-
-1.  **Discord Bot (常駐):**
-    * ユーザーからのコマンドを受信。
-    * ローカルDB (SQLite) から高速に過去データを取得する。
-    * リアルタイム株価を取得する。
-    * AI分析・グラフ生成・PDF作成を行い、ユーザーに返信する。
-2.  **Data Batch Job (定期実行):**
-    * 1日1回（深夜など）実行する。
-    * 「株・プラス」から全銘柄の財務・信用残データを一括ダウンロードする。
-    * データを整理し、SQLiteデータベースを更新（Upsert）する。
-3.  **Infrastructure:**
-    * **Oracle Cloud (Always Free):** 24時間稼働のVPS環境を採用する。
-
----
-
-## 機能要件
-
-### 1. 入力インターフェース
-- **プラットフォーム:** Discord
-- **コマンド:** `/analyze <証券コード>`
-- **入力例:** `/analyze 7203`
-
-### 2. アウトプット (PDFレポート)
-分析結果はプロフェッショナルな **PDFレポート**として生成・添付される。
-
-#### PDF構成要素
-* **ヘッダー:** 銘柄名、証券コード、現在株価、分析日時
-* **セクション1: 企業概要**
-    * 事業内容、Moat（強み）、リスク要因
-* **セクション2: チャート分析 (画像埋め込み)**
-    * ローソク足チャート (日足/週足) + 移動平均線
-    * サブチャート: RSI, ストキャスティクス
-* **セクション3: ファンダメンタルズ推移 (グラフ/表)**
-    * 過去5年の売上・利益・EPS推移グラフ
-    * PER/PBR/ROEの推移（割安感の視覚化）
-* **セクション4: 需給状況**
-    * 信用倍率の推移、機関空売り状況
-* **セクション5: AIアナリストの考察**
-    * Geminiによる総合評価（強気/中立/弱気）と詳細コメント
-
----
-
-## データ取得・管理戦略
-
-パフォーマンス確保のため、**「オンデマンド取得」と「事前蓄積」**を使い分ける。
-
-| データ種別 | 取得元 | 取得タイミング | 保存先 |
-| :--- | :--- | :--- | :--- |
-| **リアルタイム株価** | 株・プラス (API/CSV) | **オンデマンド** (コマンド実行時) | メモリ (一時利用) |
-| **企業概要・ニュース** | Google Search API / Web | **オンデマンド** | メモリ (一時利用) |
-| **財務・指標データ** | 株・プラス (Daily CSV) | **バッチ処理** (毎日) | **SQLite Database** |
-| **信用残データ** | 株・プラス (Weekly CSV) | **バッチ処理** (週末) | **SQLite Database** |
-
----
-
-## 技術スタック
-
-### アプリケーション
-- **言語:** Python 3.9+
-- **Bot Framework:** `discord.py`
-- **Database:** `sqlite3` (軽量RDB)
-- **PDF Generation:** `reportlab` (高度なPDF描画)
-- **Visualization:** `mplfinance`, `matplotlib`
-- **AI Model:** Google Gemini API (`gemini-1.5-flash` 推奨)
-
-### インフラ・運用
-- **Server:** Oracle Cloud Infrastructure (Always Free / VM.Standard.E2.Micro)
-- **OS:** Ubuntu Linux
-- **Job Scheduler:** `cron` (Linux標準スケジューラ)
-
----
-
-## ディレクトリ構成 (Planned)
+## 📂 ディレクトリ構成 (Refactored)
 
 ```text
-stock-analysis-bot/
-├── data/
-│   └── stock_data.db       # SQLiteデータベース (Git除外)
+Projects/個別株分析/
+├── data/                    # SQLite Database (stock_data.db)
 ├── src/
-│   ├── main.py             # Bot起動・イベントハンドラ
-│   ├── batch_loader.py     # 定期実行用データ収集スクリプト
-│   ├── db_manager.py       # データベース操作(CRUD)
-│   ├── data_loader.py      # Bot用データ読み込み (DB参照)
-│   ├── analyzer.py         # Gemini AI分析ロジック
-│   ├── chart_generator.py  # グラフ画像生成
-│   └── pdf_generator.py    # PDFレポート作成
-├── images/                 # 一時画像フォルダ (Git除外)
-├── .env                    # APIキー設定
-├── .gitignore
-├── requirements.txt
-└── README.md
+│   ├── bot/                 # Discord Bot Interface
+│   │   └── discord_bot.py   # Bot Main Entry Point (Slash Commands)
+│   ├── core/                # Core Infrastructure
+│   │   ├── db_manager.py    # Database Connection & Schema
+│   │   ├── data_loader.py   # Data Fetching Logic
+│   │   └── batch_loader.py  # Daily Data Update Script
+│   ├── analysis/            # Analysis & Visualization Engines
+│   │   ├── company_overview.py # [New] AI Company Summary Generator
+│   │   ├── technical_chart.py  # [Renamed] Chart Generator (Middle Panel)
+│   │   └── supply_demand.py    # Supply-Demand Analyzer (Bottom Panel)
+│   └── utils/               # Utilities
+│       └── pdf_generator.py # PDF Composition Layout Engine
+├── scripts/                 # Shell Scripts (Auto-update, etc.)
+└── requirements.txt
+```
+
+## 🛠️ 技術スタック
+- **Language**: Python 3.11+
+- **Platform**: Discord (py-cord / discord.py)
+- **Database**: SQLite3
+- **Analysis**: Pandas, NumPy
+- **Visualization**: Matplotlib, mplfinance
+- **AI**: Google Gemini API (Flash 2.0 ideally)
+- **Infrastructure**: Oracle Cloud (Free Tier), GitHub Actions (Data Sync)
+
+## 🔄 データフロー
+1.  **Data Update**: GitHub Actions or Cron job runs `batch_loader.py` daily to update `stock_data.db`.
+2.  **User Request**: User types `/analyze 7203` in Discord.
+3.  **Processing**:
+    *   `discord_bot.py` receives request.
+    *   `company_overview.py` fetches info and generates summary via AI.
+    *   `technical_chart.py` generates chart image.
+    *   `supply_demand.py` generates dashboard image.
+    *   `pdf_generator.py` combines images and text into a single PDF.
+4.  **Response**: Bot uploads the PDF to Discord.
+
+## ✅ Next Steps
+1.  Refactor folder structure.
+2.  Implement `company_overview.py` (AI summarization).
+3.  Refine `technical_chart.py` (Middle panel layout).
+4.  Update `supply_demand.py` (Bottom panel layout & styles).
+5.  Update `pdf_generator.py` (Combine all 3 elements).
+6.  Finalize `discord_bot.py`.

@@ -9,7 +9,7 @@
             "cwd": "${workspaceFolder}", // <-- 実行時のカレントディレクトリをプロジェクトのルートに設定 (重要!)
             "console": "integratedTerminal",
             "justMyCode": true,
-            "pythonPath": "${command:python.interpreterPath}" // <-- venvのPythonを使う
+            "python": "${command:python.interpreterPath}" // <-- venvのPythonを使う
         }
     ]
 }

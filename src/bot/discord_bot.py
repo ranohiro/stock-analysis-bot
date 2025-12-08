@@ -49,7 +49,12 @@ async def on_message(message):
                 # --- 2. グラフ生成フェーズ ---
                 await message.channel.send(f"### ✅ データ取得成功: {company} ({code})")
                     
-                chart_info = generate_charts(analysis_data['stock_data'], code)
+                chart_info = generate_charts(
+                    analysis_data['stock_data'], 
+                    code,
+                    analysis_data['financial_data'],
+                    analysis_data['margin_data']
+                )
 
                 # --- 3. AI分析フェーズ ---
                 await message.channel.send("🧠 **Gemini AIによる詳細分析を開始します...**")

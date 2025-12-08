@@ -11,92 +11,75 @@ Example:
 
 import sys
 import os
+import pandas as pd
 from datetime import datetime
-from src.data_loader import fetch_data
-from src.chart_generator import generate_charts
-from src.analyzer import generate_analysis
-from src.pdf_generator import generate_pdf_report
 
-def test_pdf_generation(code: str):
-    """
-    指定された証券コードのPDFレポートを生成し、ローカルに保存する
+# Add project root
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from src.core.db_manager import get_connection
+from src.analysis.company_overview import CompanyOverviewGenerator
+from src.analysis.technical_chart import generate_charts
+from src.analysis.supply_demand import SupplyDemandAnalyzer
+from src.utils.pdf_generator import generate_pdf_report
+
+def test_full_report_generation(code='7203'):
+    print(f"Testing report generation for {code}...")
     
-    Args:
-        code: 証券コード（例: '7203'）
-    """
-    print(f"\n{'='*60}")
-    print(f"PDF生成テスト - 証券コード: {code}")
-    print(f"{'='*60}\n")
+    conn = get_connection()
     
     try:
-        # --- 1. データ取得 ---
-        print("📊 データを取得しています...")
-        analysis_data = fetch_data(code)
-        
-        if analysis_data.get("error"):
-            print(f"❌ エラー: {analysis_data['error']}")
+        # 1. Get Company Info
+        df_comp = pd.read_sql(f"SELECT * FROM companies WHERE code='{code}'", conn)
+        if df_comp.empty:
+            print("Company not found")
             return False
+        name = df_comp.iloc[0]['name']
+        industry = df_comp.iloc[0]['industry']
+        print(f"Target: {name} ({industry})")
+
+        # 2. Skip AI Overview (Removed)
+        # overview_gen = CompanyOverviewGenerator()
+        # overview = overview_gen.generate_overview(code, name, industry)
         
-        company = analysis_data["company_name"]
-        print(f"✅ データ取得成功: {company} ({code})")
+        # 3. Generate Technical Chart
+        print("Generating Technical Chart...")
+        sda = SupplyDemandAnalyzer()
+        stock_data = sda.load_stock_data(code)
         
-        # --- 2. チャート生成 ---
-        print("\n📈 チャートを生成しています...")
-        chart_info = generate_charts(analysis_data['stock_data'], code)
-        print("✅ チャート生成完了")
+        chart_res = generate_charts(stock_data['prices'], code, stock_data['financial'], stock_data['margin'])
+        chart_buffer = chart_res['file']
+
+        # 4. Generate Supply-Demand Dashboard AND Get Metadata
+        print("Generating Supply-Demand Dashboard...")
+        dash_path = f"debug/temp_dash_{code}.png"
+        os.makedirs("debug", exist_ok=True)
         
-        # --- 3. AI分析 ---
-        print("\n🧠 AI分析を実行しています...")
-        analysis_result = generate_analysis(
-            company_name=company,
-            code=code,
-            summary=analysis_data['company_summary'],
-            stock_data=analysis_data['stock_data'],
-            financial_data=analysis_data['financial_data'],
-            chart_buffer=chart_info['file']
-        )
+        # plot_analysis now returns metadata dict
+        meta_data = sda.plot_analysis(code, save_path=dash_path)
         
-        if analysis_result.get("error"):
-            print(f"❌ AI分析エラー: {analysis_result['error']}")
-            return False
+        import io
+        with open(dash_path, 'rb') as f:
+            dash_buffer = io.BytesIO(f.read())
+        os.remove(dash_path)
         
-        print("✅ AI分析完了")
-        
-        # --- 4. PDF生成 ---
-        print("\n📄 PDFレポートを生成しています...")
+        # 5. Generate PDF
+        print("Combining into PDF...")
         pdf_buffer = generate_pdf_report(
-            company_name=company,
-            code=code,
-            current_price=analysis_data['stock_data']['Close'].iloc[-1],
-            summary=analysis_data['company_summary'],
-            stock_data=analysis_data['stock_data'],
-            financial_data=analysis_data['financial_data'],
-            chart_image_buffer=chart_info['file'],
-            ai_analysis=analysis_result['report']
+            meta_data, # Pass metadata instead of separate args
+            chart_buffer, 
+            dash_buffer
         )
         
-        # --- 5. ファイル保存 ---
-        output_dir = os.path.join(os.path.dirname(__file__), 'debug', 'pdfs')
-        os.makedirs(output_dir, exist_ok=True)
+        # Save PDF
+        out_dir = "debug/reports"
+        os.makedirs(out_dir, exist_ok=True)
+        out_path = f"{out_dir}/Report_{code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"{code}_{company}_analysis_{timestamp}.pdf"
-        filepath = os.path.join(output_dir, filename)
-        
-        with open(filepath, 'wb') as f:
+        with open(out_path, "wb") as f:
             f.write(pdf_buffer.getvalue())
-        
-        print(f"✅ PDF生成完了: {filepath}")
-        print(f"\nファイルサイズ: {os.path.getsize(filepath) / 1024:.1f} KB")
-        
-        # --- 6. プレビューで開く（Mac専用） ---
-        print("\n🔍 プレビューで開いています...")
-        os.system(f'open "{filepath}"')
-        
-        print(f"\n{'='*60}")
-        print("✅ すべての処理が完了しました！")
-        print(f"{'='*60}\n")
-        
+            
+        print(f"✅ Report saved to: {out_path}")
         return True
         
     except Exception as e:
@@ -115,7 +98,7 @@ def main():
         code = input("証券コードを入力してください (デフォルト: 7203): ").strip() or "7203"
     
     # PDF生成テスト実行
-    success = test_pdf_generation(code)
+    success = test_full_report_generation(code)
     
     # 終了コード
     sys.exit(0 if success else 1)
