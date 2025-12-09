@@ -37,7 +37,7 @@ jobs:
       run: |
         if [ ! -f data/stock_data.db ]; then
           echo "データベースが存在しないため、新規作成します"
-          python src/db_manager.py
+          python src/core/db_manager.py
         fi
     
     - name: Run batch data update

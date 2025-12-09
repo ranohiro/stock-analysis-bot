@@ -1,25 +1,30 @@
 import os
 import discord
+import io
+import asyncio
+from datetime import datetime
 from dotenv import load_dotenv
-from src.data_loader import fetch_data
-from src.chart_generator import generate_charts
-from src.analyzer import generate_analysis
 
+# 新しいプロジェクト構造に基づくインポート
+from src.core.data_loader import fetch_data
+from src.analysis.technical_chart import generate_charts
+from src.analysis.supply_demand import SupplyDemandAnalyzer
+from src.analysis.company_overview import CompanyOverviewGenerator
+from src.utils.pdf_generator import generate_pdf_report
 
-# .envファイルを読み込み、環境変数として設定します
+# .envファイルを読み込み
 load_dotenv()
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 # Discord Botの設定
 intents = discord.Intents.default()
-# コマンドを読み込むためにMESSAGE CONTENT INTENTを有効化
 intents.message_content = True 
 client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
     print(f'✅ Bot Login Successful: {client.user} としてログインしました。')
-    print("--- 動作確認用Discordで /analyze 証券コード を試してください ---")
+    print("--- 動作確認用: Discordで /analyze <証券コード> を試してください ---")
 
 @client.event
 async def on_message(message):
@@ -28,80 +33,98 @@ async def on_message(message):
 
     # /analyze コマンドの処理
     if message.content.startswith('/analyze'):
-        # すべての処理をこのブロックで囲むことで、実行中はDiscordに「入力中...」を表示し続ける
         async with message.channel.typing():
             try:
                 parts = message.content.split(' ')
+                if len(parts) < 2:
+                    await message.channel.send('エラー: 証券コードを入力してください。例: `/analyze 7203`')
+                    return
+                
                 code = parts[1]
-                
-                # --- 1. データ取得フェーズ ---
-                await message.channel.send(f'**{code}** のデータ取得を開始します。お待ちください...')
+                await message.channel.send(f'🔍 **{code}** のデータを分析中... (数秒〜数十秒かかります)')
 
-                analysis_data = fetch_data(code) 
-                
-                if analysis_data.get("error"):
-                    # 認証エラーやデータ取得エラーの場合
-                    await message.channel.send(f'データ取得エラー: {analysis_data["error"]}')
+                # --- 1. データ取得 ---
+                data = fetch_data(code)
+                if data.get("error"):
+                    await message.channel.send(f"❌ データ取得エラー: {data['error']}")
                     return
-                    
-                company = analysis_data["company_name"]
                 
-                # --- 2. グラフ生成フェーズ ---
-                await message.channel.send(f"### ✅ データ取得成功: {company} ({code})")
-                    
-                chart_info = generate_charts(
-                    analysis_data['stock_data'], 
-                    code,
-                    analysis_data['financial_data'],
-                    analysis_data['margin_data']
-                )
-
-                # --- 3. AI分析フェーズ ---
-                await message.channel.send("🧠 **Gemini AIによる詳細分析を開始します...**")
+                company_name = data['company_name']
                 
-                analysis_result = generate_analysis(
-                    company_name=company,
-                    code=code,
-                    summary=analysis_data['company_summary'],
-                    stock_data=analysis_data['stock_data'],
-                    financial_data=analysis_data['financial_data'],
-                    chart_buffer=chart_info['file']
-                )
+                # --- 2. AI分析 (Gemini) ---
+                # NOTE: 並列処理したいが、まずは直列で実装
+                overview_gen = CompanyOverviewGenerator()
+                # 業種データは fetch_data の戻り値に含まれていないため、DBや補足情報が必要だが、
+                # data_loader が返す company_summary からある程度推測、またはAIに任せる
+                # ここでは正確を期すため、簡易的に data['company_summary'] を使用するか、
+                # data_loader の戻り値を拡張するのがベストだが、今回は一旦 'Unknown' または data内から探す
+                
+                # fetch_dataの実装を見ると戻り値は:
+                # stock_data, financial_data, margin_data, company_name, company_summary
+                
+                ai_result = overview_gen.generate_overview(code, company_name, "日本株") # 業種は現在取得フロー外のため仮置き
+                
+                ai_summary = ai_result.get('summary', '情報なし')
+                ai_topics = ai_result.get('topics', '情報なし')
 
-                if analysis_result.get("error"):
-                    await message.channel.send(f"AI分析エラー: {analysis_result['error']}")
+                # --- 3. テクニカルチャート生成 ---
+                chart_res = generate_charts(
+                    data['stock_data'], 
+                    code, 
+                    data['financial_data'], 
+                    data['margin_data']
+                )
+                chart_buffer = chart_res['file']
+
+                # --- 4. 需給分析 & メタデータ取得 ---
+                sda = SupplyDemandAnalyzer()
+                # 一時ファイルとして保存して読み込む (matplotlibの仕様回避)
+                temp_dash_path = f"temp_dash_{code}_{datetime.now().timestamp()}.png"
+                
+                # plot_analysis は同期的に実行される
+                meta_data = sda.plot_analysis(code, save_path=temp_dash_path)
+                
+                if not meta_data:
+                    await message.channel.send(f"❌ 需給分析エラー: データの不足によりチャートを生成できませんでした。")
+                    if os.path.exists(temp_dash_path): os.remove(temp_dash_path)
                     return
 
-                # AIレポートをPDFに変換して送信
-                from src.pdf_generator import generate_pdf_report
+                # 画像をバッファに読み込み
+                with open(temp_dash_path, 'rb') as f:
+                    dash_buffer = io.BytesIO(f.read())
                 
+                # 一時ファイル削除
+                if os.path.exists(temp_dash_path):
+                    os.remove(temp_dash_path)
+
+                # --- 5. PDFレポート生成 ---
                 pdf_buffer = generate_pdf_report(
-                    company_name=company,
-                    code=code,
-                    current_price=analysis_data['stock_data']['Close'].iloc[-1],
-                    summary=analysis_data['company_summary'],
-                    stock_data=analysis_data['stock_data'],
-                    financial_data=analysis_data['financial_data'],
-                    chart_image_buffer=chart_info['file'],
-                    ai_analysis=analysis_result['report']
+                    meta_data,
+                    chart_buffer,
+                    dash_buffer
                 )
                 
-                # PDFファイルをDiscordに送信
-                await message.channel.send(
-                    content=f"✅ **{company} ({code})** の分析レポートを生成しました。",
-                    file=discord.File(pdf_buffer, filename=f"{code}_analysis_report.pdf")
+                # --- 6. Discord送信 ---
+                # AIの要約をメッセージ本文として送信
+                response_text = (
+                    f"## 📊 {company_name} ({code}) 分析レポート\n"
+                    f"**【事業概要】**\n{ai_summary}\n\n"
+                    f"**【直近トピック】**\n{ai_topics}\n"
                 )
-                                        
-            except IndexError:
-                await message.channel.send('エラー: 証券コードを入力してください。例: `/analyze 7203`')
-            except Exception as e:
-                # その他の予期せぬエラー（エラーメッセージを2000文字以内に制限）
-                error_msg = str(e)
-                if len(error_msg) > 1800:
-                    error_msg = error_msg[:1800] + '...(省略)'
-                await message.channel.send(f'予期せぬエラーが発生しました: {error_msg}')
+                
+                # PDFを添付
+                file = discord.File(pdf_buffer, filename=f"Report_{code}.pdf")
+                
+                await message.channel.send(content=response_text, file=file)
+                print(f"✅ Sent report for {code}")
 
-if TOKEN:
-    client.run(TOKEN)
-else:
-    print("❌ Error: .envファイルにDISCORD_BOT_TOKENが設定されていません。")
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                await message.channel.send(f'❌ 予期せぬエラーが発生しました: {str(e)}')
+
+if __name__ == '__main__':
+    if TOKEN:
+        client.run(TOKEN)
+    else:
+        print("❌ Error: .envファイルにDISCORD_BOT_TOKENが設定されていません。")

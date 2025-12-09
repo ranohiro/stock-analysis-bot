@@ -267,3 +267,6 @@ def get_margin_balance(code: str, limit: int = 26):
 
     initialize_db()
 
+
+if __name__ == "__main__":
+    initialize_db()

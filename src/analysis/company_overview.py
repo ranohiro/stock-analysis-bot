@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
@@ -11,19 +10,20 @@ class CompanyOverviewGenerator:
     def __init__(self):
         if GEMINI_API_KEY:
             try:
-                self.client = genai.Client(api_key=GEMINI_API_KEY)
+                genai.configure(api_key=GEMINI_API_KEY)
+                self.api_key_set = True
             except Exception as e:
                 print(f"Gemini Client Initialization Error: {e}")
-                self.client = None
+                self.api_key_set = False
         else:
-            self.client = None
+            self.api_key_set = False
             print("Warning: GEMINI_API_KEY is not set.")
 
     def generate_overview(self, code: str, name: str, industry: str) -> dict:
         """
         Generates a concise company overview (Business Summary & Recent Topics).
         """
-        if not self.client:
+        if not self.api_key_set:
             return {
                 "summary": "AI分析機能が無効です (API Key未設定)",
                 "topics": "AI分析機能が無効です (API Key未設定)"
@@ -54,12 +54,16 @@ class CompanyOverviewGenerator:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model='gemini-2.0-flash-exp',  # Using flash model for speed/cost efficiency
-                contents=[user_prompt],
-                config=types.GenerateContentConfig(
-                    system_instruction=system_prompt,
-                    temperature=0.1  # Low temperature for factual accuracy
+            # Initialize model with system instruction
+            model = genai.GenerativeModel(
+                model_name='gemini-2.0-flash-exp',
+                system_instruction=system_prompt
+            )
+            
+            response = model.generate_content(
+                user_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.1
                 )
             )
             
