@@ -1,10 +1,10 @@
 import io
 import os
 from datetime import datetime
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib import colors
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
 from reportlab.pdfbase import pdfmetrics
@@ -43,11 +43,17 @@ def on_page(canvas, doc):
     """ページ背景を描画"""
     canvas.saveState()
     canvas.setFillColor(BG_COLOR)
-    canvas.rect(0, 0, A4[0], A4[1], fill=True, stroke=False)
+    # Landscape A4: Width=297mm (842pt), Height=210mm (595pt)
+    width, height = landscape(A4)
+    canvas.rect(0, 0, width, height, fill=True, stroke=False)
+    
+    # Footer removed from here to avoid duplication on every page.
+    # Added to story end instead.
+    
     canvas.restoreState()
 
 def generate_pdf_report(
-    meta_data: dict,      # {code, name, market, industry, price, change, change_pct, score}
+    meta_data: dict,      # {code, name, market, industry, price, change, change_pct, score, date}
     chart_image: io.BytesIO,
     dashboard_image: io.BytesIO
 ) -> io.BytesIO:
@@ -57,19 +63,21 @@ def generate_pdf_report(
     base_font = 'Japanese' if font_available else 'Helvetica'
 
     buffer = io.BytesIO()
+    # 横向き (Landscape) - Single Page Layout
+    # Margins minimized to 5mm for maximum chart area
     doc = SimpleDocTemplate(
         buffer,
-        pagesize=A4,
-        topMargin=15*mm,
-        bottomMargin=10*mm,
-        leftMargin=10*mm,
-        rightMargin=10*mm
+        pagesize=landscape(A4),
+        topMargin=5*mm,
+        bottomMargin=5*mm,
+        leftMargin=5*mm,
+        rightMargin=5*mm
     )
     
     story = []
-    styles = getSampleStyleSheet()
-
-    # === Header Construction ===
+    
+    # === Compact Header ===
+    # ... (Header code remains mostly same, just ensuring compact)
     code = meta_data.get('code', '0000')
     name = meta_data.get('name', 'Unknown')
     market = meta_data.get('market', '-')
@@ -77,74 +85,73 @@ def generate_pdf_report(
     price = meta_data.get('price', 0)
     change = meta_data.get('change', 0)
     change_pct = meta_data.get('change_pct', 0)
+    price_date = meta_data.get('date', None)
     
-    # Text Styles
-    header_title = ParagraphStyle('HT', fontName=bold_font, fontSize=24, textColor=TEXT_MAIN, leading=28)
-    header_info = ParagraphStyle('HI', fontName=base_font, fontSize=12, textColor=TEXT_DIM)
-    header_price = ParagraphStyle('HP', fontName=bold_font, fontSize=32, textColor=TEXT_MAIN, leading=32)
-    
-    # Change Color
-    color_hex = '#238636' if change >= 0 else '#da3633'
-    sign = '+' if change >= 0 else ''
-    header_change = ParagraphStyle('HC', fontName=bold_font, fontSize=18, textColor=colors.HexColor(color_hex))
+    if price_date:
+        try:
+            date_obj = datetime.strptime(str(price_date), '%Y%m%d')
+            date_str = date_obj.strftime('%Y/%m/%d')
+        except:
+            date_str = str(price_date)
+    else:
+        date_str = "-"
 
-    # Row 1: Code Name | Market Industry
-    p_title = Paragraph(f"{name} <font size=16>({code})</font>", header_title)
-    p_info = Paragraph(f"{market} | {industry}", header_info)
+    # Styles
+    title_style = ParagraphStyle('T', fontName=bold_font, fontSize=18, textColor=TEXT_MAIN)
+    # Info Style Increased to 14 (User Request: "Like this" -> Bigger)
+    info_style = ParagraphStyle('I', fontName=base_font, fontSize=14, textColor=TEXT_DIM) 
+    price_style = ParagraphStyle('P', fontName=bold_font, fontSize=20, textColor=TEXT_MAIN, alignment=TA_RIGHT)
     
-    # Row 2: Price | Change
-    p_price = Paragraph(f"¥{price:,.0f}", header_price)
-    p_change = Paragraph(f"{sign}{change:,.0f} ({sign}{change_pct:.2f}%)", header_change)
-    
-    # Table for Header
-    # Col 1: Name/Price, Col 2: Info/Change
-    # Wait, user wants "Header part... summarized good".
-    # Let's put Name/Code on Top. Price/Change below. Industry right aligned?
-    # Simple Layout:
-    # Left: Name (Large)
-    # Below Left: Market/Industry
-    # Right: Price (Large)
-    # Below Right: Change
+    color_hex = '#ef4444' if change >= 0 else '#3b82f6' 
+    sign = '+' if change >= 0 else ''
+    change_style = ParagraphStyle('C', fontName=bold_font, fontSize=14, textColor=colors.HexColor(color_hex), alignment=TA_RIGHT)
+
+    # Content
+    p_left_top = Paragraph(f"<font size=14 color='#8b949e'>{code}</font>  {name}", title_style)
+    p_left_bot = Paragraph(f"{market} | {industry}", info_style)
+    # Date Size Increased to 14
+    p_right_top = Paragraph(f"¥{price:,.0f} <font size=14 color='#8b949e'>({date_str})</font>", price_style)
+    p_right_bot = Paragraph(f"{sign}{change:,.0f} ({sign}{change_pct:.2f}%)", change_style)
     
     data = [
-        [p_title, p_price],
-        [p_info, p_change]
+        [p_left_top, p_right_top],
+        [p_left_bot, p_right_bot]
     ]
-    t = Table(data, colWidths=[110*mm, 70*mm])
+    t = Table(data, colWidths=[180*mm, 100*mm], rowHeights=[9*mm, 7*mm]) # Slightly taller row for fonts
     t.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
-        ('ALIGN', (1,0), (1,-1), 'RIGHT'), # Price right aligned
-        ('RIGHTPADDING', (1,0), (1,-1), 10),
-        ('LEFTPADDING', (0,0), (0,-1), 10),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LEFTPADDING', (0,0), (-1,-1), 2),
+        ('RIGHTPADDING', (0,0), (-1,-1), 2),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
     ]))
     story.append(t)
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#30363d'), spaceBefore=5, spaceAfter=10))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#30363d'), spaceBefore=1, spaceAfter=2))
 
-    # === Middle: Technical Chart ===
-    # User said "Upper section is AI (removed)... stock chart compressed..."
-    # Now we have more vertical space.
-    section_title = ParagraphStyle('ST', fontName=bold_font, fontSize=14, textColor=ACCENT_BLUE, spaceAfter=5)
-    story.append(Paragraph("■ テクニカル分析 (日足 / 6ヶ月)", section_title))
-    
+    # === Technical Chart (Page 1) ===
     chart_image.seek(0)
-    # A4 Height ~297mm. Top/Bot margin 25mm total. Header ~30mm. Available ~240mm.
-    # Chart: 100mm, Dashboard: 120mm -> Fits perfectly.
-    img_tech = Image(chart_image, width=190*mm, height=110*mm) 
+    # Page 1: Header takes ~25mm. Available ~185mm. 
+    # Use 165mm to be safe and fill space.
+    img_tech = Image(chart_image, width=285*mm, height=165*mm) 
     story.append(img_tech)
-    story.append(Spacer(1, 8*mm))
-
-    # === Bottom: Supply-Demand Dashboard ===
-    story.append(Paragraph("■ 需給分析ダッシュボード", section_title))
+    
+    # 改ページ
+    story.append(PageBreak())
+    
+    # === Supply-Demand Dashboard (Page 2) ===
+    # Page 2: Full availability (200mm). Use 190mm.
+    # Title overlay is inside the chart, so we don't need extra text here.
     dashboard_image.seek(0)
-    img_dash = Image(dashboard_image, width=190*mm, height=115*mm)
+    img_dash = Image(dashboard_image, width=285*mm, height=185*mm) # Slightly shorter to fit footer
     story.append(img_dash)
     
-    # Footer
-    story.append(Spacer(1, 5*mm))
-    p_foot = Paragraph(f"Generated on {datetime.now().strftime('%Y/%m/%d %H:%M')} | Data Source: Kabu Plus", 
-                       ParagraphStyle('F', fontName=base_font, fontSize=8, textColor=colors.grey, alignment=TA_CENTER))
-    story.append(p_foot)
-
+    # === Footer (End of Document) ===
+    # Only one footer at the end
+    footer_text = f"Generated on {datetime.now().strftime('%Y/%m/%d %H:%M')} | Data Source: Kabu Plus | by Takiさん"
+    footer_style = ParagraphStyle('F', fontName=base_font, fontSize=10, textColor=colors.grey, alignment=TA_CENTER)
+    story.append(Spacer(1, 2*mm))
+    story.append(Paragraph(footer_text, footer_style))
+    
     doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
     buffer.seek(0)
     return buffer

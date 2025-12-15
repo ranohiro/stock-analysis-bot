@@ -11,12 +11,13 @@ from src.core.batch_loader import run_daily_batch
 
 def update_data():
     """
-    直近30日間のデータをチェックし、データベースを更新します。
+    当日分データをチェックし、データベースを更新します。
     """
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] === データ更新プロセス開始 ===")
     
+    # 起動時は「当日分」のみをチェック（再起動ごとの過剰アクセス防止）
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=10)
+    start_date = end_date - timedelta(days=0)
     
     try:
         # 株・プラスからデータを取得してDB保存

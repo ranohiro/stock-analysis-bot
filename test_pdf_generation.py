@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 PDF生成テストスクリプト
@@ -18,7 +19,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.core.db_manager import get_connection
-from src.analysis.company_overview import CompanyOverviewGenerator
+# from src.analysis.company_overview import CompanyOverviewGenerator  # Not used
 from src.analysis.technical_chart import generate_charts
 from src.analysis.supply_demand import SupplyDemandAnalyzer
 from src.utils.pdf_generator import generate_pdf_report

@@ -264,8 +264,61 @@ def get_margin_balance(code: str, limit: int = 26):
             df = df.set_index('Date')
         
         return df
+    
+    
+def get_market_advance_decline(limit: int = 30, market_filter: str = None):
+    """
+    市場全体の騰落数を集計する（前日比ベース）
+    
+    Args:
+        limit: 取得日数
+        market_filter: '東証PR' など、companies.market に対するフィルタ
+        
+    Returns:
+        pandas.DataFrame: columns=[date, up_count, down_count]
+    """
+    import pandas as pd
+    
+    with get_connection() as conn:
+        # 1. Determine target codes first (if filter exists)
+        market_condition = ""
+        params = []
+        if market_filter:
+            market_condition = "AND code IN (SELECT code FROM companies WHERE market LIKE ?)"
+            params.append(f"%{market_filter}%")
+            
+        # 2. Use Window Function to get Close - PrevClose
+        # We fetch enough history (limit + 5 days buffer) to ensure diff is possible
+        # Actually simplest is to fetch slightly more dates then limit results.
+        
+        query = f"""
+            WITH PriceChanges AS (
+                SELECT date,
+                       close - LAG(close) OVER (PARTITION BY code ORDER BY date) as change
+                FROM daily_prices
+                WHERE 1=1 {market_condition}
+            ),
+            DailyCounts AS (
+                SELECT date,
+                       SUM(CASE WHEN change > 0 THEN 1 ELSE 0 END) as up_count,
+                       SUM(CASE WHEN change < 0 THEN 1 ELSE 0 END) as down_count
+                FROM PriceChanges
+                WHERE change IS NOT NULL
+                GROUP BY date
+            )
+            SELECT date, up_count, down_count
+            FROM DailyCounts
+            ORDER BY date DESC
+            LIMIT ?
+        """
+        params.append(limit)
 
-    initialize_db()
+        df = pd.read_sql_query(query, conn, params=params)
+        if not df.empty:
+            df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+            df = df.sort_values('date')
+            df = df.set_index('date')
+        return df
 
 
 if __name__ == "__main__":

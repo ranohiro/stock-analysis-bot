@@ -363,8 +363,13 @@ def run_daily_batch(start_date_str: str, end_date_str: str):
         for date in dates:
             date_str = date.strftime('%Y%m%d')
             
-            # 土日はスキップ (市場休業日)
+            # 土日はスキップ
             if date.weekday() >= 5: continue
+            
+            # 祝日もスキップ（無駄なアクセスを防ぐ）
+            if jpholiday.is_holiday(date):
+                print(f"Skipping: {date_str} (Holiday)")
+                continue
                 
             print(f"Processing: {date_str}")
             insert_daily_prices(date_str, conn, session)
@@ -378,8 +383,14 @@ def run_daily_batch(start_date_str: str, end_date_str: str):
         print("\n=== ✅ 全処理完了 ===")
 
 if __name__ == '__main__':
-    # 直近30日分のデータを取得（欠落データの補完用）
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Stock Data Batch Loader')
+    parser.add_argument('--days', type=int, default=0, help='Past days to fetch (default: 0 = Today only)')
+    args = parser.parse_args()
+
+    # 指定日数分を取得
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
+    start_date = end_date - timedelta(days=args.days)
     
     run_daily_batch(start_date.strftime('%Y%m%d'), end_date.strftime('%Y%m%d'))

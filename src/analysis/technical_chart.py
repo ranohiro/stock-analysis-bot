@@ -6,6 +6,9 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
+import numpy as np
 
 # グローバルにフォントパスを設定
 FONT_PATH = None
@@ -101,26 +104,29 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
     # チャートスタイル設定
     # SupplyDemandAnalyzerに合わせて色を調整
     # bg: #0e1117, text: #e6edf3, grid: #30363d
+    # 日本標準: 陽線(Up)=赤, 陰線(Down)=青
     
     mc = mpf.make_marketcolors(
-        up='#2f81f7', down='#da3633', # 青/赤
+        up='#ef4444', down='#3b82f6', # 赤/青
         edge='inherit', wick='inherit',
-        volume='in', alpha=1.0
+        volume='inherit', alpha=1.0 # volume='inherit'でキャンドル色に合わせる
     )
     
-    # フォントサイズを全体的に大きく
+    # フォントサイズを全体的に大きく (User Request: 1.2x - 1.5x)
     rc_params = {
-        'font.size': 14,          # 12 -> 14
-        'axes.labelsize': 14,     # 12 -> 14
-        'axes.titlesize': 18,     # 14 -> 18
-        'xtick.labelsize': 12,    # 10 -> 12
-        'ytick.labelsize': 12,    # 10 -> 12
+        'font.size': 16,          # 14 -> 16
+        'axes.labelsize': 16,     # 14 -> 16
+        'axes.titlesize': 20,     # 18 -> 20
+        'xtick.labelsize': 14,    # 12 -> 14
+        'ytick.labelsize': 15,    # 12 -> 15
         'axes.grid': True,
-        'grid.alpha': 0.3,
-        'grid.linestyle': ':',
+        'axes.grid.axis': 'y',     # 横線のみ
+        'grid.alpha': 0.9,         # 0.7 -> 0.9 (Darker)
+        'grid.linewidth': 1.0,     # 0.8 -> 1.0
+        'grid.linestyle': '-',     # 実線
         'axes.unicode_minus': False,
-        'figure.facecolor': '#0e1117',
-        'axes.facecolor': '#161b22',
+        'figure.facecolor': '#000000', # Black
+        'axes.facecolor': '#000000',   # Black
         'axes.edgecolor': '#30363d',
         'text.color': '#e6edf3',
         'axes.labelcolor': '#8b949e',
@@ -138,9 +144,9 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
         base_mpf_style='nightclouds', # Dark base
         marketcolors=mc,
         gridcolor='#30363d',
-        gridstyle=':',
-        facecolor='#161b22',
-        figcolor='#0e1117',
+        gridstyle='-', # 実線
+        facecolor='#000000', # Black
+        figcolor='#000000',  # Black
         rc=rc_params
     )
 
@@ -154,47 +160,121 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
         type='candle', 
         style=s, 
         ylabel='', 
-        ylabel_lower='',
+        ylabel_lower='', # Manually adding label later
         volume=True,
         volume_panel=1,
         addplot=apd,
         returnfig=True,
-        figsize=(16, 10), # 横長すぎると縦がつぶれるので、比率調整 (またはPDF側で合わせる)
-        panel_ratios=(6, 1.5, 1.5), # メインパネルを大きく確保
+        figsize=(25, 14), # Fill Page 1 (Landscape)
+        panel_ratios=(10, 3, 3), # Maintain good proportions
         tight_layout=True,
         datetime_format='%Y/%m/%d',
         xrotation=0,
-        scale_padding={'left': 0.5, 'top': 1.0, 'right': 1.2, 'bottom': 1.0}
+        scale_padding={'left': 0.5, 'top': 0.2, 'right': 1.0, 'bottom': 0.2} # Increase left padding for labels
     )
     
     # --- 軸と見た目の調整 ---
-    
-    # 全パネルの右軸を有効化
+    # Legend text size
     for ax in axes:
-        ax.yaxis.tick_right()
-        ax.yaxis.set_label_position("right")
-        ax.grid(True, linestyle=':', alpha=0.3)
+        start, end = ax.get_ylim()
+        ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=6, prune='both'))
+        ax.tick_params(axis='y', labelsize=15) # Larger fonts (explicit)
+    
+    # 全パネルの共通設定
+    for i, ax in enumerate(axes):
+        # Make axes transparent so stripes (and figure bg) show through
+        ax.patch.set_visible(False) 
+        
+        # グリッド設定 (横線のみ、実線、適度な間隔)
+        ax.grid(True, axis='y', linestyle='-', linewidth=0.8, color='#30363d', alpha=0.9, zorder=1) # Grid zorder=1
+        ax.grid(False, axis='x') 
+        
+        # Y軸の目盛り最適化 (MaxNLocatorで自動調整)
+        if i == 0: # Main panel
+             ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=10, steps=[1, 2, 5, 10]))
+        elif i == 4: # Stoch panel
+             ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=4))
+        
     
     # メインパネル (0)
     ax_main = axes[0]
-    ax_main.set_ylabel('株価 (円)', rotation=270, labelpad=20, color='#8b949e')
+    fp_mx = fm.FontProperties(fname=font_path, size=16) if font_path else None
     
-    ax_main.yaxis.get_major_locator().set_params(nbins=10)
+    # Rotation 0 (Horizontal)
+    # y=1.02 moves it above the axis, or y=0.5 moves it to center side.
+    # User said "横向き (Side orientation)". 
+    # Usually `rotation=0` + `ha='right'` puts it to the left of axis horizontally.
+    ax_main.set_ylabel('株価\n(円)', rotation=0, labelpad=50, y=0.5, va='center', ha='center', color='#8b949e', fontproperties=fp_mx)
 
-    # タイトル (PDFヘッダーにあるため削除)
-    # title_text = f'{code} - テクニカル分析 (6ヶ月 / 日足)'
-    # if font_path:
-    #     ax_main.set_title(title_text, fontproperties=fm.FontProperties(fname=font_path), fontsize=16, fontweight='bold', pad=15, color='#e6edf3')
-    # else:
-    #     ax_main.set_title(f'{code} - Technical Analysis', fontsize=16, fontweight='bold', pad=15, color='#e6edf3')
-    pass
+    # --- Background Stripes (Separate Axis to fix Z-Order) ---
+    # Create an axis BEHIND everything for stripes
+    # zorder: ax_bg(0) < ax_vol(1) < ax_main(2)
+    ax_bg = fig.add_axes(ax_main.get_position(), sharex=ax_main, sharey=ax_main, frameon=False, zorder=0)
+    ax_bg.set_xlim(ax_main.get_xlim())
+    ax_bg.set_ylim(ax_main.get_ylim())
+    ax_bg.axis('off')
+    
+    # Draw stripes on ax_bg (Main Panel Background)
+    dates = pd.to_datetime(plot_data.index)
+    months = dates.to_period('M')
+    month_changes = np.where(months[:-1] != months[1:])[0] + 1
+    boundaries = [0] + list(month_changes) + [len(dates)]
+    
+    # Define Stripe Drawing Helper
+    def draw_stripes(target_ax):
+        for j in range(len(boundaries)-1):
+            start = boundaries[j]
+            end = boundaries[j+1]
+            if j % 2 != 0:
+                target_ax.axvspan(start, end, facecolor='#21262d', alpha=0.5, zorder=-10)
 
-    # 価格帯別出来高 (Axis共有)
-    ax_volume_profile = ax_main.twiny() 
+    # 1. Main Panel Stripes (on ax_bg)
+    draw_stripes(ax_bg)
+
+    # 2. Volume & Stoch Stripes
+    # Volume is axes[2], Stoch is axes[4]
+    if len(axes) > 2:
+        draw_stripes(axes[2])
+    if len(axes) > 4:
+        draw_stripes(axes[4])
+
+    # --- Volume Axis Scaling & Label (TeX) ---
+    vol_max = volume_data['Volume'].max()
+    exponent = 0
+    if vol_max > 0:
+        exponent = int(np.floor(np.log10(vol_max)))
+    
+    scale_factor = 10 ** exponent
+    
+    # Use Mathtext for nice superscript without unicode issues
+    # e.g. $\times 10^6$
+    # Need to assume matplotlib mathtext font works (usually Dejavu Sans).
+    # If we use Japanese font property for title, checks if it breaks math.
+    # Usually fine to mix.
+    vol_label = r'出来高' + '\n' + r'($\times 10^{' + str(exponent) + r'}$)'
+    
+    ax_vol = axes[2] # Volume Axis Panel
+    ax_vol.set_ylabel(vol_label, rotation=0, labelpad=50, y=0.5, va='center', ha='center', color='#8b949e', fontproperties=fp_mx)
+    
+    class ScaledFormatter(ticker.Formatter):
+        def __init__(self, scale):
+            self.scale = scale
+        def __call__(self, x, pos=None):
+            return f"{x/self.scale:.1f}"
+            
+    ax_vol.yaxis.set_major_formatter(ScaledFormatter(scale_factor))
+
+
+    # --- Price-by-Volume (Volume Profile) ---
+    # Create Axis Middle Layer
+    ax_volume_profile = ax_main.twiny() # Twins ax_main position
     ax_volume_profile.set_xlim(0, volume_profile.max() * 5)
-    ax_volume_profile.set_zorder(0)
-    ax_main.set_zorder(1)
-    ax_main.patch.set_visible(False)
+    
+    # Set Z-Orders
+    ax_bg.set_zorder(0)
+    ax_volume_profile.set_zorder(1) 
+    ax_main.set_zorder(2)
+    ax_main.patch.set_visible(False) # Transparent Main
     
     price_centers = [interval.mid for interval in volume_profile.index]
     volumes = volume_profile.values
@@ -202,7 +282,7 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
     ax_volume_profile.barh(price_centers, volumes, 
                            height=(price_max - price_min) / 30,
                            align='center',
-                           color='#6e7681', alpha=0.2) # グレーで見立たなく
+                           color='#6e7681', alpha=0.5) 
     
     ax_volume_profile.xaxis.set_visible(False)
     for spine in ax_volume_profile.spines.values():
