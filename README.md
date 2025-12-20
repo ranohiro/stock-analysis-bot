@@ -4,9 +4,9 @@
 
 **Discord上で動作する、日本株分析の完全自動化システム**
 
-ユーザーがDiscordで `/analyze [証券コード]` コマンドを送信すると、対象銘柄の**テクニカルチャート**、**需給分析ダッシュボード**、**AI企業概要**を含む高品質なPDFレポートを自動生成して返信します。
+ユーザーがDiscordで `/analyze [証券コード]` コマンドを送信すると、対象銘柄の**テクニカルチャート**と**需給分析ダッシュボード**を含む高品質なPDFレポートを自動生成して返信します。
 
-Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは毎日自動更新されます。
+Oracle Cloud Infrastructure (OCI) 上で24/7常時稼働し、データベースは毎日自動更新されます。
 
 ---
 
@@ -28,12 +28,8 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 - **株価・信用倍率の推移グラフ**: 直近6ヶ月の動向
 - **パフォーマンス比較**: TOPIX比の相対強度
 - **信用取引評価**: 主要指標（信用倍率、売残/買残、機関投資家動向等）
-- **需給スコア**: 複合的な評価指標（A/B/C/D/Eランク）
+- **需給スコア**: 複合的な評価指標（視覚的ゲージ表示）
 - **スコア算出過程**: 各項目の詳細な内訳表示
-
-### 4. **AI企業概要生成 (将来実装予定)**
-- Google Gemini APIを活用した企業サマリー
-- ビジネスモデル、業績トレンド、最新トピックを簡潔に要約
 
 ---
 
@@ -52,7 +48,7 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 │  └───────────────────────────────────┘ │
 │  ┌───────────────────────────────────┐ │
 │  │  Data Updater (Cron Job)          │ │
-│  │  - 毎日定刻実行 (18:00)           │ │
+│  │  - 毎日定刻実行 (18:00 JST)       │ │
 │  │  - 株・プラスAPIからデータ取得     │ │
 │  │  - SQLiteデータベース更新         │ │
 │  └───────────────────────────────────┘ │
@@ -61,14 +57,15 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 │  │  - 日足株価 (約3,800銘柄)         │ │
 │  │  - 週次信用残 (最新26週分)        │ │
 │  │  - 財務指標・業種別指数           │ │
+│  │  - 分析履歴                       │ │
 │  └───────────────────────────────────┘ │
 └─────────────────────────────────────────┘
 ```
 
-### **重要な変更点**
-- ✅ **GitHub Actionsは不要**: OCI上でデータ更新が完結するため、GitHub Actionsによるデータ同期は廃止されました
+### **重要な特徴**
 - ✅ **完全自律稼働**: サーバー再起動時も自動復旧（Systemdによる管理）
 - ✅ **低コスト運用**: Oracle Cloud Free Tierで運用可能
+- ✅ **高速レスポンス**: PDFは数秒で生成
 
 ---
 
@@ -77,21 +74,21 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 ```text
 個別株分析/
 ├── data/                        # SQLite Database
-│   └── stock_data.db            # 全銘柄データ (日足・信用残・財務)
+│   └── stock_data.db            # 全銘柄データ (日足・信用残・財務・履歴)
 ├── src/
 │   ├── bot/
 │   │   └── discord_bot.py       # Discord Bot メインエントリーポイント
 │   ├── core/
 │   │   ├── db_manager.py        # DB接続・スキーマ管理
+│   │   ├── data_loader.py       # データ読み込みユーティリティ
 │   │   └── batch_loader.py      # 日次データ更新スクリプト
 │   ├── analysis/
 │   │   ├── technical_chart.py   # テクニカルチャート生成
-│   │   ├── supply_demand.py     # 需給分析ダッシュボード生成
-│   │   └── company_overview.py  # AI企業概要生成 (未実装)
+│   │   └── supply_demand.py     # 需給分析ダッシュボード生成
 │   └── utils/
 │       └── pdf_generator.py     # PDFレイアウト・結合エンジン
 ├── dataset/
-│   └── fonts/                   # 日本語フォント (IPAゴシック等)
+│   └── fonts/                   # 日本語フォント (IPAゴシック)
 ├── requirements.txt             # Python依存ライブラリ
 ├── main.py                      # Bot起動スクリプト (データ更新→Bot起動)
 └── README.md                    # このファイル
@@ -109,9 +106,8 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 | **データ分析** | Pandas, NumPy |
 | **可視化** | Matplotlib, mplfinance |
 | **PDF生成** | ReportLab |
-| **AI** | Google Gemini API (Flash 2.0) *将来* |
 | **データソース** | 株・プラス (kabu.plus) |
-| **インフラ** | Oracle Cloud (Oracle Linux 8/9) |
+| **インフラ** | Oracle Cloud (Oracle Linux 9) |
 | **プロセス管理** | Systemd (Bot常駐), Cron (データ更新) |
 
 ---
@@ -120,7 +116,7 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 
 ### **日次データ更新フロー**
 ```
-1. Cron Job (毎日18:00) → batch_loader.py 実行
+1. Cron Job (毎日18:00 JST) → batch_loader.py 実行
 2. 株・プラスAPIから最新データをダウンロード
    - 日足株価 (全銘柄)
    - 週次信用残
@@ -142,19 +138,6 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
    - ヘッダー・フッター追加
 6. Bot: Discord にPDFファイルをアップロード
 ```
-
----
-
-## 🚀 デプロイ方法
-
-詳細は [`deployment_guide.md`](./.gemini/antigravity/brain/cd2bc25c-9290-46c3-99e6-e9ef30c4a2b8/deployment_guide.md) を参照してください。
-
-**概要:**
-1. Oracle Cloud (OCI) にSSH接続
-2. プロジェクトファイルを `rsync` でアップロード
-3. 依存ライブラリをインストール (`pip install -r requirements.txt`)
-4. Systemdサービスとして登録 (Bot自動起動)
-5. Cronでデータ更新を設定 (毎日18:00実行)
 
 ---
 
@@ -185,8 +168,16 @@ Oracle Cloud Infrastructure (OCI) 上で常時稼働し、データベースは�
 | sell_balance_total | REAL | 信用売残 (総計) |
 | buy_balance_total | REAL | 信用買残 (総計) |
 | ratio | REAL | 信用倍率 (買残/売残) |
-| sell_balance_ins / buy_balance_ins | REAL | 制度信用 売残/買残 |
-| sell_balance_gen / buy_balance_gen | REAL | 一般信用 売残/買残 |
+
+### `analysis_history` - 分析履歴
+| カラム | 型 | 説明 |
+|--------|-------|------|
+| id | INTEGER | 自動採番ID (Primary Key) |
+| stock_code | TEXT | 証券コード |
+| company_name | TEXT | 会社名 |
+| analyzed_at | TEXT | 分析日時 (ISO8601) |
+| user_name | TEXT | Discordユーザー名 |
+| success | INTEGER | 成功フラグ (1=成功, 0=失敗) |
 
 ---
 
@@ -199,9 +190,6 @@ DISCORD_BOT_TOKEN=your_discord_bot_token
 # 株・プラス認証情報
 KABU_PLUS_USER=your_username
 KABU_PLUS_PASSWORD=your_password
-
-# Google Gemini API (将来)
-GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ---
@@ -223,7 +211,7 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourusername/stock-analysis-bot.git
+git clone https://github.com/ranohiro/stock-analysis-bot.git
 cd stock-analysis-bot
 
 # 仮想環境作成
@@ -234,14 +222,13 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # 環境変数を設定 (.env ファイルを作成)
-cp .env.example .env
 # .env を編集して認証情報を追加
 
 # データベース初期化
 python -m src.core.db_manager
 
 # データ取得 (直近180日分)
-python -m src.batch_loader
+python src/batch_loader.py
 
 # Bot起動
 python main.py
@@ -256,12 +243,105 @@ python test_pdf_generation.py 7203
 
 ---
 
-## 📋 今後の開発予定
+## 🚀 デプロイ (Oracle Cloud)
 
-- [ ] AI企業概要機能の実装 (Gemini API統合)
-- [ ] 複数銘柄の比較レポート機能
-- [ ] アラート機能 (特定条件でレポート自動送信)
-- [ ] Webダッシュボード (FastAPI + React)
+### 前提条件
+- Oracle Cloud アカウント (Free Tier可)
+- SSH接続設定済み
+- Python 3.9+ インストール済み
+
+### デプロイ手順
+
+1. **プロジェクトファイルをアップロード**
+   ```bash
+   rsync -avz --exclude 'venv' --exclude '__pycache__' \
+     -e "ssh -i ssh-key.key" \
+     . opc@<server-ip>:~/stock-bot/
+   ```
+
+2. **サーバー上でセットアップ**
+   ```bash
+   ssh -i ssh-key.key opc@<server-ip>
+   cd ~/stock-bot
+   
+   # 依存関係インストール
+   pip3 install --user -r requirements.txt
+   
+   # フォントインストール
+   sudo dnf install -y ipa-gothic-fonts
+   
+   # .env作成
+   nano .env  # 認証情報を入力
+   
+   # DB初期化
+   python3 -m src.core.db_manager
+   
+   # データ取得
+   python3 src/batch_loader.py
+   ```
+
+3. **Systemdサービス登録**
+   ```bash
+   sudo nano /etc/systemd/system/stock-bot.service
+   ```
+   
+   ```ini
+   [Unit]
+   Description=Stock Analysis Discord Bot
+   After=network.target
+
+   [Service]
+   Type=simple
+   User=opc
+   WorkingDirectory=/home/opc/stock-bot
+   ExecStart=/usr/bin/python3 main.py
+   Restart=always
+   RestartSec=10
+   Environment="LANG=ja_JP.UTF-8"
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable stock-bot
+   sudo systemctl start stock-bot
+   sudo systemctl status stock-bot
+   ```
+
+4. **Cronでデータ自動更新**
+   ```bash
+   crontab -e
+   ```
+   
+   ```cron
+   # 毎日18:00に実行
+   0 9 * * * cd ~/stock-bot && /usr/bin/python3 src/batch_loader.py >> ~/cron.log 2>&1
+   ```
+
+---
+
+## 📋 運用・メンテナンス
+
+### ログ確認
+```bash
+# Bot稼働ログ
+sudo journalctl -u stock-bot -f
+
+# Cron実行ログ
+tail -f ~/cron.log
+```
+
+### Bot再起動
+```bash
+sudo systemctl restart stock-bot
+```
+
+### データベース確認
+```bash
+sqlite3 ~/stock-bot/data/stock_data.db
+```
 
 ---
 
@@ -273,7 +353,7 @@ python test_pdf_generation.py 7203
 
 ## 👤 作者
 
-開発: [@hiranotakahiro](https://github.com/hiranotakahiro)
+開発: [@ranohiro](https://github.com/ranohiro)
 
 ---
 
