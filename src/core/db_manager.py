@@ -85,8 +85,58 @@ def create_tables(conn: sqlite3.Connection):
             PRIMARY KEY (code, date)
         )
     """)
+    
+    # 7. 分析履歴 (analysis_history):
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS analysis_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            stock_code TEXT NOT NULL,
+            company_name TEXT,
+            analyzed_at TEXT NOT NULL,
+            user_name TEXT,
+            success INTEGER DEFAULT 1
+        );
+    """)
     conn.commit()
     print("✅ Tables created/verified successfully.")
+
+def log_analysis_history(code: str, company_name: str = None, user_name: str = None, success: bool = True):
+    """
+    分析履歴を記録する
+    
+    Args:
+        code: 証券コード
+        company_name: 会社名（オプション）
+        user_name: Discordユーザー名（オプション）
+        success: 成功フラグ（デフォルト: True）
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO analysis_history (stock_code, company_name, analyzed_at, user_name, success)
+            VALUES (?, ?, ?, ?, ?)
+        """, (code, company_name, datetime.now().isoformat(), user_name, 1 if success else 0))
+        conn.commit()
+
+def get_analysis_history(limit: int = 10):
+    """
+    分析履歴を取得する
+    
+    Args:
+        limit: 取得件数（デフォルト: 10件）
+        
+    Returns:
+        履歴のリスト [(id, stock_code, company_name, analyzed_at, user_name, success), ...]
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, stock_code, company_name, analyzed_at, user_name, success
+            FROM analysis_history
+            ORDER BY analyzed_at DESC
+            LIMIT ?
+        """, (limit,))
+        return cursor.fetchall()
 
 def initialize_db():
     """データベースファイルを初期化し、テーブルを作成する"""

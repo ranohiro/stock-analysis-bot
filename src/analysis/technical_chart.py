@@ -18,12 +18,15 @@ def setup_japanese_font_for_chart():
     global FONT_PATH
     
     try:
-        # IPAゴシックフォントのパスを探す
+        # プロジェクト内フォントを最優先、次にシステムフォント
         font_paths = [
+            './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
+            'dataset/fonts/ipag.ttf',     # 相対パス別パターン
             '~/Library/Fonts/ipag.ttf',
             '/Library/Fonts/ipag.ttf',
             '~/Library/Fonts/IPAGothic.ttc',
-            '/Library/Fonts/IPAGothic.ttc'
+            '/Library/Fonts/IPAGothic.ttc',
+            '/usr/share/fonts/ipa-gothic/ipag.ttf',  # Linux
         ]
         
         for font_path in font_paths:
@@ -135,7 +138,7 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
         'grid.color': '#30363d'
     }
     
-    if os.path.exists(font_path):
+    if font_path and os.path.exists(font_path):
         # mplfinance/matplotlib sometimes needs just the font family name
         prop = fm.FontProperties(fname=font_path)
         rc_params['font.family'] = prop.get_name()

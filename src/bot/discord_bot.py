@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 
 # 新しいプロジェクト構造に基づくインポート
 from src.core.data_loader import fetch_data
+from src.core.db_manager import log_analysis_history, get_analysis_history  # 履歴機能
 from src.analysis.technical_chart import generate_charts
 from src.analysis.supply_demand import SupplyDemandAnalyzer
-from src.analysis.company_overview import CompanyOverviewGenerator
+# from src.analysis.company_overview import CompanyOverviewGenerator  # 未使用
 from src.utils.pdf_generator import generate_pdf_report
 
 # .envファイルを読み込み
@@ -41,32 +42,21 @@ async def on_message(message):
                     return
                 
                 code = parts[1]
-                await message.channel.send(f'🔍 **{code}** のデータを分析中... (数秒〜数十秒かかります)')
+                # シンプルなメッセージのみ
+                status_msg = await message.channel.send(f'🔍 **{code}** を分析中...')
 
                 # --- 1. データ取得 ---
                 data = fetch_data(code)
                 if data.get("error"):
-                    await message.channel.send(f"❌ データ取得エラー: {data['error']}")
+                    await message.channel.send(f"❌ エラー: {data['error']}")
                     return
                 
                 company_name = data['company_name']
                 
-                # --- 2. AI分析 (Gemini) ---
-                # NOTE: 並列処理したいが、まずは直列で実装
-                overview_gen = CompanyOverviewGenerator()
-                # 業種データは fetch_data の戻り値に含まれていないため、DBや補足情報が必要だが、
-                # data_loader が返す company_summary からある程度推測、またはAIに任せる
-                # ここでは正確を期すため、簡易的に data['company_summary'] を使用するか、
-                # data_loader の戻り値を拡張するのがベストだが、今回は一旦 'Unknown' または data内から探す
+                # --- 2. AI分析はスキップ（オプション機能） ---
+                # overview_gen = CompanyOverviewGenerator()
+                # ai_result = overview_gen.generate_overview(code, company_name, "日本株")
                 
-                # fetch_dataの実装を見ると戻り値は:
-                # stock_data, financial_data, margin_data, company_name, company_summary
-                
-                ai_result = overview_gen.generate_overview(code, company_name, "日本株") # 業種は現在取得フロー外のため仮置き
-                
-                ai_summary = ai_result.get('summary', '情報なし')
-                ai_topics = ai_result.get('topics', '情報なし')
-
                 # --- 3. テクニカルチャート生成 ---
                 chart_res = generate_charts(
                     data['stock_data'], 
@@ -78,22 +68,18 @@ async def on_message(message):
 
                 # --- 4. 需給分析 & メタデータ取得 ---
                 sda = SupplyDemandAnalyzer()
-                # 一時ファイルとして保存して読み込む (matplotlibの仕様回避)
                 temp_dash_path = f"temp_dash_{code}_{datetime.now().timestamp()}.png"
                 
-                # plot_analysis は同期的に実行される
                 meta_data = sda.plot_analysis(code, save_path=temp_dash_path)
                 
                 if not meta_data:
-                    await message.channel.send(f"❌ 需給分析エラー: データの不足によりチャートを生成できませんでした。")
+                    await message.channel.send(f"❌ データ不足のため生成できませんでした。")
                     if os.path.exists(temp_dash_path): os.remove(temp_dash_path)
                     return
 
-                # 画像をバッファに読み込み
                 with open(temp_dash_path, 'rb') as f:
                     dash_buffer = io.BytesIO(f.read())
                 
-                # 一時ファイル削除
                 if os.path.exists(temp_dash_path):
                     os.remove(temp_dash_path)
 
@@ -104,24 +90,69 @@ async def on_message(message):
                     dash_buffer
                 )
                 
-                # --- 6. Discord送信 ---
-                # AIの要約をメッセージ本文として送信
-                response_text = (
-                    f"## 📊 {company_name} ({code}) 分析レポート\n"
-                    f"**【事業概要】**\n{ai_summary}\n\n"
-                    f"**【直近トピック】**\n{ai_topics}\n"
-                )
-                
-                # PDFを添付
+                # --- 6. Discord送信（AI要約なし）---
                 file = discord.File(pdf_buffer, filename=f"Report_{code}.pdf")
                 
-                await message.channel.send(content=response_text, file=file)
+                # 分析中メッセージを削除（エラーを無視）
+                try:
+                    await status_msg.delete()
+                except Exception as del_err:
+                    print(f"⚠️  Status message deletion failed (harmless): {del_err}")
+                
+                # PDFのみ送信
+                await message.channel.send(file=file)
+                
+                # 履歴を記録（エラーを無視）
+                try:
+                    user_name = f"{message.author.name}#{message.author.discriminator}"
+                    log_analysis_history(code, company_name, user_name, success=True)
+                except Exception as log_err:
+                    print(f"⚠️  History logging failed (harmless): {log_err}")
+                
                 print(f"✅ Sent report for {code}")
 
             except Exception as e:
+                # エラーをログに記録するのみ（ユーザーには表示しない）
+                # PDF生成は成功しているが、Discord接続タイムアウトなどで例外が発生する場合がある
                 import traceback
-                traceback.print_exc()
-                await message.channel.send(f'❌ 予期せぬエラーが発生しました: {str(e)}')
+                error_trace = traceback.format_exc()
+                print(f"⚠️  Exception occurred (non-critical): {error_trace}")
+    
+    # /history コマンドの処理
+    if message.content.startswith('/history'):
+        try:
+            history = get_analysis_history(limit=10)
+            
+            if not history:
+                await message.channel.send('📊 分析履歴がありません。')
+                return
+            
+            # 履歴を整形
+            response = "📊 **分析履歴（最新10件）**\n━━━━━━━━━━━━━━━━\n"
+            for record in history:
+                record_id, stock_code, company_name, analyzed_at, user_name, success = record
+                
+                # 日時をフォーマット (ISO -> MM/DD HH:MM)
+                dt = datetime.fromisoformat(analyzed_at)
+                date_str = dt.strftime('%m/%d %H:%M')
+                
+                # 会社名表示
+                company_display = f" ({company_name})" if company_name else ""
+                
+                # ステータス
+                status_icon = "🔹" if success else "❌"
+                
+                # ユーザー名表示（あれば）
+                user_display = f" - {user_name}" if user_name else ""
+                
+                response += f"{status_icon} {date_str} - {stock_code}{company_display}{user_display}\n"
+            
+            await message.channel.send(response)
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            await message.channel.send(f'❌ 履歴の取得に失敗しました: {str(e)}')
 
 if __name__ == '__main__':
     if TOKEN:

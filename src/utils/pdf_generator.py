@@ -22,10 +22,15 @@ ACCENT_GOLD = colors.HexColor('#d29922')
 
 def setup_japanese_font():
     """日本語フォントの設定"""
-    # ユーザー環境のipag.ttfを最優先
+    # プロジェクト内フォントを最優先、次にユーザー環境、最後にLinuxシステムフォント
     font_paths = [
-        '~/Library/Fonts/ipag.ttf',
-        '/Library/Fonts/ipag.ttf',
+        './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
+        'dataset/fonts/ipag.ttf',     # 相対パス別パターン
+        '~/Library/Fonts/ipag.ttf',  # Mac user fonts
+        '/Library/Fonts/ipag.ttf',    # Mac system fonts
+        '/usr/share/fonts/ipa-gothic/ipag.ttf',  # Oracle Linux / RHEL
+        '/usr/share/fonts/japanese/TrueType/ipag.ttf',  # Debian / Ubuntu
+        '/usr/share/fonts/truetype/fonts-japanese-gothic.ttf',  # Generic Linux
     ]
     for path in font_paths:
         expanded_path = os.path.expanduser(path)

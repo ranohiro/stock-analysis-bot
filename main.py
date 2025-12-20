@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # バッチ処理のインポート
 from src.core.batch_loader import run_daily_batch
+from src.core.db_manager import initialize_db
 
 def update_data():
     """
@@ -20,6 +21,9 @@ def update_data():
     start_date = end_date - timedelta(days=0)
     
     try:
+        # DB初期化（ディレクトリ作成など）
+        initialize_db()
+        
         # 株・プラスからデータを取得してDB保存
         run_daily_batch(start_date.strftime('%Y%m%d'), end_date.strftime('%Y%m%d'))
         print("✅ データ更新完了")

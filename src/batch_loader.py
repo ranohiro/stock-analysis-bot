@@ -9,7 +9,7 @@ import time
 import jpholiday
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from src.db_manager import get_connection
+from src.core.db_manager import get_connection
 from typing import Union
 
 # .envファイルを読み込み
@@ -210,7 +210,7 @@ def insert_weekly_margin(date_str: str, conn: sqlite3.Connection, session: reque
     if df is None: return
 
     try:
-        original_cols = ["SC","公表日","信用取引区分","信用売残","信用売残 前週比","信用買残","信用買残 前週比","貸借倍率", "制度信用売残", "制度信用売残 前週比", "制度信用買残", "制度信用買残 前週比", "一般信用売残", "一般信用売残 前週比", "一般信用買残", "一般信用買残 前週比"]
+        original_cols = ["SC","公表日","信用取引区分","信用買残","信用買残 前週比","信用売残","信用売残 前週比","貸借倍率", "制度信用買残", "制度信用買残 前週比", "制度信用売残", "制度信用売残 前週比", "一般信用買残", "一般信用買残 前週比", "一般信用売残", "一般信用売残 前週比"]
         
         if len(df.columns) == len(original_cols):
             df.columns = original_cols
@@ -242,10 +242,10 @@ def insert_weekly_margin(date_str: str, conn: sqlite3.Connection, session: reque
         # DBに格納するカラムとCSVヘッダー名のマッピング
         col_map = {
             'SC': 'code',
-            '信用売残': 'sell_balance_total', '信用買残': 'buy_balance_total',
-            '貸借倍率': 'ratio', '制度信用売残': 'sell_balance_ins', 
-            '制度信用買残': 'buy_balance_ins', '一般信用売残': 'sell_balance_gen', 
-            '一般信用買残': 'buy_balance_gen'
+            '信用買残': 'buy_balance_total', '信用売残': 'sell_balance_total',
+            '貸借倍率': 'ratio', '制度信用買残': 'buy_balance_ins', 
+            '制度信用売残': 'sell_balance_ins', '一般信用買残': 'buy_balance_gen', 
+            '一般信用売残': 'sell_balance_gen'
         }
         
         valid_cols = {csv_name: db_name for csv_name, db_name in col_map.items() if csv_name in df.columns}
@@ -378,8 +378,8 @@ def run_daily_batch(start_date_str: str, end_date_str: str):
         print("\n=== ✅ 全処理完了 ===")
 
 if __name__ == '__main__':
-    # 直近30日分のデータを取得（欠落データの補完用）
+    # 直近180日分（約6ヶ月）を取得（チャート表示分を確保しつつ負荷軽減）
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=400)
+    start_date = end_date - timedelta(days=180)
     
     run_daily_batch(start_date.strftime('%Y%m%d'), end_date.strftime('%Y%m%d'))

@@ -55,8 +55,10 @@ class SupplyDemandAnalyzer:
 
     def _setup_font(self):
         """日本語フォントの設定"""
-        # User defined priority first
+        # プロジェクト内フォントを最優先
         font_paths = [
+            './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
+            'dataset/fonts/ipag.ttf',     # 相対パス別パターン
             '~/Library/Fonts/ipag.ttf',
             '/Library/Fonts/ipag.ttf',
             '~/Library/Fonts/IPAGothic.ttc',
@@ -502,14 +504,14 @@ class SupplyDemandAnalyzer:
         if not margin_df.empty:
             margin_df['date'] = pd.to_datetime(margin_df['date'], format='%Y%m%d')
             
-            # DBのbuy/sellが逆転しているため、明示的に代入して修正
-            # sell_balance_total (DB) -> 実際は「信用買い残」 (Buy_Balance)
-            # buy_balance_total (DB) -> 実際は「信用売り残」 (Sell_Balance)
-            margin_df['Buy_Balance'] = margin_df['sell_balance_total']
-            margin_df['Sell_Balance'] = margin_df['buy_balance_total']
+            # DBは修正済みなので、正しいマッピングを使用
+            # buy_balance_total (DB) → 信用買い残 (Buy_Balance)
+            # sell_balance_total (DB) → 信用売り残 (Sell_Balance)
+            margin_df['Buy_Balance'] = margin_df['buy_balance_total']
+            margin_df['Sell_Balance'] = margin_df['sell_balance_total']
             margin_df['Ratio'] = margin_df['ratio']
-            margin_df['Buy_Balance_Ins'] = margin_df['sell_balance_ins']
-            margin_df['Sell_Balance_Ins'] = margin_df['buy_balance_ins']
+            margin_df['Buy_Balance_Ins'] = margin_df['buy_balance_ins']
+            margin_df['Sell_Balance_Ins'] = margin_df['sell_balance_ins']
             
             margin_df = margin_df.set_index('date')
 
@@ -738,22 +740,15 @@ class SupplyDemandAnalyzer:
         
         # Explicitly map columns if needed (assuming DB Manager returns standard DF)
         if not margin_df.empty:
-             # CRITICAL FIX: DB columns are swapped for some reason. 
-             # Buy_Balance contains Sell data, Sell_Balance contains Buy data.
-             # We must swap them back to get correct Ratio and Chart.
-             # Check if Ratio is consistent? Ratio in DB is Buy/Sell?
-             # If DB Ratio is ~4.0 but calculating buy/sell gives 0.25, then columns are swapped.
-             # Force swap here to be safe and consistent with previous fix.
-             margin_df = margin_df.rename(columns={'Buy_Balance': 'Temp', 'Sell_Balance': 'Buy_Balance'})
-             margin_df = margin_df.rename(columns={'Temp': 'Sell_Balance'})
+             # DBは修正済みなので、そのまま使用（スワップ不要）
+             # データはload_stock_dataで正しくマッピング済み
              
-             # Re-calculate Ratio just in case
-             # (Accessing via vector operation to update 'Ratio' column if it exists)
+             # Ratioの整合性確認（念のため）
              if 'Buy_Balance' in margin_df.columns and 'Sell_Balance' in margin_df.columns:
-                 # Avoid division by zero
-                 mask = margin_df['Sell_Balance'] > 0
-                 margin_df.loc[mask, 'Ratio'] = margin_df.loc[mask, 'Buy_Balance'] / margin_df.loc[mask, 'Sell_Balance']
-                 margin_df.loc[~mask, 'Ratio'] = 999.0
+                  # Avoid division by zero
+                  mask = margin_df['Sell_Balance'] > 0
+                  margin_df.loc[mask, 'Ratio'] = margin_df.loc[mask, 'Buy_Balance'] / margin_df.loc[mask, 'Sell_Balance']
+                  margin_df.loc[~mask, 'Ratio'] = 999.0
              pass
 
         # 4. 決算・財務情報
