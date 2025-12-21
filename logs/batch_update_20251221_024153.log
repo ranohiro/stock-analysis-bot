@@ -1,0 +1,662 @@
+=== Stock Data Batch Update ===
+開始時刻: Sun Dec 21 02:41:53 JST 2025
+
+/Users/hiranotakahiro/Projects/個別株分析/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+=== バッチ処理開始: 20250624 ~ 20251221 ===
+Processing: 20250624
+  -> 株価・企業情報: 3809件 処理完了
+  -> 財務指標: 3809件 処理完了
+  -> 信用残: 3807件 処理完了 (データ日付: 20250620)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250625
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250625.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250626
+  -> 株価・企業情報: 3811件 処理完了
+  -> 財務指標: 3811件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250626.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250627
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250627.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250630
+  -> 株価・企業情報: 3812件 処理完了
+  -> 財務指標: 3812件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250630.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250701
+  -> 株価・企業情報: 3812件 処理完了
+  -> 財務指標: 3812件 処理完了
+  -> 信用残: 3810件 処理完了 (データ日付: 20250627)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250702
+  -> 株価・企業情報: 3811件 処理完了
+  -> 財務指標: 3811件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250702.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250703
+  -> 株価・企業情報: 3811件 処理完了
+  -> 財務指標: 3811件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250703.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250704
+  -> 株価・企業情報: 3812件 処理完了
+  -> 財務指標: 3812件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250704.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250707
+  -> 株価・企業情報: 3812件 処理完了
+  -> 財務指標: 3812件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250707.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250708
+  -> 株価・企業情報: 3812件 処理完了
+  -> 財務指標: 3812件 処理完了
+  -> 信用残: 3810件 処理完了 (データ日付: 20250704)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250709
+  -> 株価・企業情報: 3811件 処理完了
+  -> 財務指標: 3811件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250709.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250710
+  -> 株価・企業情報: 3811件 処理完了
+  -> 財務指標: 3811件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250710.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250711
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250711.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250714
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250714.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250715
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> 信用残: 3808件 処理完了 (データ日付: 20250711)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250716
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250716.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250717
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250717.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250718
+  -> 株価・企業情報: 3809件 処理完了
+  -> 財務指標: 3809件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250718.csv (404 Not Found)
+  -> 業種別指数データ: 109件 処理完了
+Processing: 20250721
+  -> スキップ: japan-all-stock-prices-2_20250721.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20250721.csv (404 Not Found)
+  -> スキップ: 20250721 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20250721.csv (404 Not Found)
+Processing: 20250722
+  -> 株価・企業情報: 3809件 処理完了
+  -> 財務指標: 3809件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250722.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250723
+  -> 株価・企業情報: 3809件 処理完了
+  -> 財務指標: 3809件 処理完了
+  -> 信用残: 3807件 処理完了 (データ日付: 20250718)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250724
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250724.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250725
+  -> 株価・企業情報: 3810件 処理完了
+  -> 財務指標: 3810件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250725.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250728
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250728.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250729
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> 信用残: 3806件 処理完了 (データ日付: 20250725)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250730
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250730.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250731
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250731.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250801
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250801.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250804
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250804.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250805
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> 信用残: 3805件 処理完了 (データ日付: 20250801)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250806
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250806.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250807
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250807.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250808
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250808.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250811
+  -> スキップ: japan-all-stock-prices-2_20250811.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20250811.csv (404 Not Found)
+  -> スキップ: 20250811 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20250811.csv (404 Not Found)
+Processing: 20250812
+  -> 株価・企業情報: 3807件 処理完了
+  -> 財務指標: 3807件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250812.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250813
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> 信用残: 3806件 処理完了 (データ日付: 20250808)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250814
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250814.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250815
+  -> 株価・企業情報: 3808件 処理完了
+  -> 財務指標: 3808件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250815.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250818
+  -> 株価・企業情報: 3806件 処理完了
+  -> 財務指標: 3806件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250818.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250819
+  -> 株価・企業情報: 3805件 処理完了
+  -> 財務指標: 3805件 処理完了
+  -> 信用残: 3803件 処理完了 (データ日付: 20250815)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250820
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250820.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250821
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250821.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250822
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250822.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250825
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250825.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250826
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> 信用残: 3802件 処理完了 (データ日付: 20250822)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250827
+  -> 株価・企業情報: 3804件 処理完了
+  -> 財務指標: 3804件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250827.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250828
+  -> 株価・企業情報: 3801件 処理完了
+  -> 財務指標: 3801件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250828.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250829
+  -> 株価・企業情報: 3801件 処理完了
+  -> 財務指標: 3801件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250829.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250901
+  -> 株価・企業情報: 3800件 処理完了
+  -> 財務指標: 3800件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250901.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250902
+  -> 株価・企業情報: 3800件 処理完了
+  -> 財務指標: 3800件 処理完了
+  -> 信用残: 3798件 処理完了 (データ日付: 20250829)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250903
+  -> 株価・企業情報: 3800件 処理完了
+  -> 財務指標: 3800件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250903.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250904
+  -> 株価・企業情報: 3799件 処理完了
+  -> 財務指標: 3799件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250904.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250905
+  -> 株価・企業情報: 3799件 処理完了
+  -> 財務指標: 3799件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250905.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250908
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250908.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250909
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> 信用残: 3796件 処理完了 (データ日付: 20250905)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250910
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250910.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250911
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250911.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250912
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250912.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250915
+  -> スキップ: japan-all-stock-prices-2_20250915.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20250915.csv (404 Not Found)
+  -> スキップ: 20250915 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20250915.csv (404 Not Found)
+Processing: 20250916
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250916.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250917
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> 信用残: 3796件 処理完了 (データ日付: 20250912)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250918
+  -> 株価・企業情報: 3798件 処理完了
+  -> 財務指標: 3798件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250918.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250919
+  -> 株価・企業情報: 3795件 処理完了
+  -> 財務指標: 3795件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250919.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250922
+  -> 株価・企業情報: 3795件 処理完了
+  -> 財務指標: 3795件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250922.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250923
+  -> スキップ: japan-all-stock-prices-2_20250923.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20250923.csv (404 Not Found)
+  -> スキップ: 20250923 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20250923.csv (404 Not Found)
+Processing: 20250924
+  -> 株価・企業情報: 3794件 処理完了
+  -> 財務指標: 3794件 処理完了
+  -> 信用残: 3792件 処理完了 (データ日付: 20250919)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250925
+  -> 株価・企業情報: 3795件 処理完了
+  -> 財務指標: 3795件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250925.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250926
+  -> 株価・企業情報: 3794件 処理完了
+  -> 財務指標: 3794件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250926.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250929
+  -> 株価・企業情報: 3787件 処理完了
+  -> 財務指標: 3787件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20250929.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20250930
+  -> 株価・企業情報: 3787件 処理完了
+  -> 財務指標: 3787件 処理完了
+  -> 信用残: 3785件 処理完了 (データ日付: 20250926)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251001
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251001.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251002
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251002.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251003
+  -> 株価・企業情報: 3791件 処理完了
+  -> 財務指標: 3791件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251003.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251006
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251006.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251007
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> 信用残: 3790件 処理完了 (データ日付: 20251003)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251008
+  -> 株価・企業情報: 3793件 処理完了
+  -> 財務指標: 3793件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251008.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251009
+  -> 株価・企業情報: 3793件 処理完了
+  -> 財務指標: 3793件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251009.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251010
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251010.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251013
+  -> スキップ: japan-all-stock-prices-2_20251013.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20251013.csv (404 Not Found)
+  -> スキップ: 20251013 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20251013.csv (404 Not Found)
+Processing: 20251014
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251014.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251015
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> 信用残: 3788件 処理完了 (データ日付: 20251010)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251016
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251016.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251017
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251017.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251020
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251020.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251021
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> 信用残: 3788件 処理完了 (データ日付: 20251017)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251022
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251022.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251023
+  -> 株価・企業情報: 3791件 処理完了
+  -> 財務指標: 3791件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251023.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251024
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251024.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251027
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251027.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251028
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> 信用残: 3790件 処理完了 (データ日付: 20251024)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251029
+  -> 株価・企業情報: 3792件 処理完了
+  -> 財務指標: 3792件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251029.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251030
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251030.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251031
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251031.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251103
+  -> スキップ: japan-all-stock-prices-2_20251103.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20251103.csv (404 Not Found)
+  -> スキップ: 20251103 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20251103.csv (404 Not Found)
+Processing: 20251104
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251104.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251105
+  -> 株価・企業情報: 3790件 処理完了
+  -> 財務指標: 3790件 処理完了
+  -> 信用残: 3788件 処理完了 (データ日付: 20251031)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251106
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251106.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251107
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251107.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251110
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251110.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251111
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> 信用残: 3787件 処理完了 (データ日付: 20251107)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251112
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251112.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251113
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251113.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251114
+  -> 株価・企業情報: 3789件 処理完了
+  -> 財務指標: 3789件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251114.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251117
+  -> 株価・企業情報: 3788件 処理完了
+  -> 財務指標: 3788件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251117.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251118
+  -> 株価・企業情報: 3788件 処理完了
+  -> 財務指標: 3788件 処理完了
+  -> 信用残: 3786件 処理完了 (データ日付: 20251114)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251119
+  -> 株価・企業情報: 3788件 処理完了
+  -> 財務指標: 3788件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251119.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251120
+  -> 株価・企業情報: 3787件 処理完了
+  -> 財務指標: 3787件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251120.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251121
+  -> 株価・企業情報: 3787件 処理完了
+  -> 財務指標: 3787件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251121.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251124
+  -> スキップ: japan-all-stock-prices-2_20251124.csv (404 Not Found)
+  -> スキップ: japan-all-stock-data_20251124.csv (404 Not Found)
+  -> スキップ: 20251124 (市場休業日/祝日)
+  -> スキップ: tosho-index-data_20251124.csv (404 Not Found)
+Processing: 20251125
+  -> 株価・企業情報: 3787件 処理完了
+  -> 財務指標: 3787件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251125.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251126
+  -> 株価・企業情報: 3786件 処理完了
+  -> 財務指標: 3786件 処理完了
+  -> 信用残: 3784件 処理完了 (データ日付: 20251121)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251127
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251127.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251128
+  -> 株価・企業情報: 3782件 処理完了
+  -> 財務指標: 3782件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251128.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251201
+  -> 株価・企業情報: 3785件 処理完了
+  -> 財務指標: 3785件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251201.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251202
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> 信用残: 3782件 処理完了 (データ日付: 20251128)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251203
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251203.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251204
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251204.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251205
+  -> 株価・企業情報: 3785件 処理完了
+  -> 財務指標: 3785件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251205.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251208
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251208.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251209
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> 信用残: 3781件 処理完了 (データ日付: 20251205)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251210
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251210.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251211
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251211.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251212
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251212.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251215
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251215.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251216
+  -> 株価・企業情報: 3783件 処理完了
+  -> 財務指標: 3783件 処理完了
+  -> 信用残: 3781件 処理完了 (データ日付: 20251212)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251217
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251217.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251218
+  -> 株価・企業情報: 3785件 処理完了
+  -> 財務指標: 3785件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251218.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+Processing: 20251219
+  -> 株価・企業情報: 3784件 処理完了
+  -> 財務指標: 3784件 処理完了
+  -> スキップ: tosho-stock-margin-transactions-2_20251219.csv (404 Not Found)
+  -> 業種別指数データ: 110件 処理完了
+
+=== ✅ 全処理完了 ===
+
+✅ データ更新が正常に完了しました
+完了時刻: Sun Dec 21 08:51:59 JST 2025
+
+--- データベース統計 ---
+企業数: 3919
+最新データ: 20251219
+
+================================

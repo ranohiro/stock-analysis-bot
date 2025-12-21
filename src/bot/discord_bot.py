@@ -29,6 +29,9 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    # デバッグ: メッセージ受信確認
+    print(f"[DEBUG] Message received: '{message.content}' from {message.author}")
+    
     if message.author == client.user:
         return
 
@@ -42,11 +45,15 @@ async def on_message(message):
                     return
                 
                 code = parts[1]
+                print(f"[INFO] Starting analysis for {code}")
+                
                 # シンプルなメッセージのみ
                 status_msg = await message.channel.send(f'🔍 **{code}** を分析中...')
 
                 # --- 1. データ取得 ---
+                print(f"[STEP 1/5] Fetching data for {code}...")
                 data = fetch_data(code)
+                print(f"[STEP 1/5] Data fetch completed for {code}")
                 if data.get("error"):
                     await message.channel.send(f"❌ エラー: {data['error']}")
                     return
@@ -58,6 +65,7 @@ async def on_message(message):
                 # ai_result = overview_gen.generate_overview(code, company_name, "日本株")
                 
                 # --- 3. テクニカルチャート生成 ---
+                print(f"[STEP 2/5] Generating technical charts for {code}...")
                 chart_res = generate_charts(
                     data['stock_data'], 
                     code, 
@@ -65,12 +73,15 @@ async def on_message(message):
                     data['margin_data']
                 )
                 chart_buffer = chart_res['file']
+                print(f"[STEP 2/5] Technical charts completed for {code}")
 
                 # --- 4. 需給分析 & メタデータ取得 ---
+                print(f"[STEP 3/5] Analyzing supply/demand for {code}...")
                 sda = SupplyDemandAnalyzer()
                 temp_dash_path = f"temp_dash_{code}_{datetime.now().timestamp()}.png"
                 
                 meta_data = sda.plot_analysis(code, save_path=temp_dash_path)
+                print(f"[STEP 3/5] Supply/demand analysis completed for {code}")
                 
                 if not meta_data:
                     await message.channel.send(f"❌ データ不足のため生成できませんでした。")
@@ -84,13 +95,16 @@ async def on_message(message):
                     os.remove(temp_dash_path)
 
                 # --- 5. PDFレポート生成 ---
+                print(f"[STEP 4/5] Generating PDF report for {code}...")
                 pdf_buffer = generate_pdf_report(
                     meta_data,
                     chart_buffer,
                     dash_buffer
                 )
+                print(f"[STEP 4/5] PDF generation completed for {code}")
                 
                 # --- 6. Discord送信（AI要約なし）---
+                print(f"[STEP 5/5] Sending PDF to Discord for {code}...")
                 file = discord.File(pdf_buffer, filename=f"Report_{code}.pdf")
                 
                 # 分析中メッセージを削除（エラーを無視）
@@ -109,7 +123,7 @@ async def on_message(message):
                 except Exception as log_err:
                     print(f"⚠️  History logging failed (harmless): {log_err}")
                 
-                print(f"✅ Sent report for {code}")
+                print(f"[SUCCESS] Report sent successfully for {code}")
 
             except Exception as e:
                 # エラーをログに記録するのみ（ユーザーには表示しない）
