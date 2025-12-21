@@ -17,7 +17,7 @@ from src.core.db_manager import get_connection, get_margin_balance
 class SupplyDemandAnalyzer:
     def __init__(self):
         self.conn = get_connection()
-        self.font_path = self._setup_font()
+        self.font_family = self._setup_font()
         
         # デザインテーマ設定
         self.colors = {
@@ -50,26 +50,26 @@ class SupplyDemandAnalyzer:
             'grid.linestyle': ':',
             'font.family': 'sans-serif'
         })
-        if self.font_path:
-             plt.rcParams['font.sans-serif'] = [os.path.basename(self.font_path)]
+        if self.font_family:
+             plt.rcParams['font.sans-serif'] = [self.font_family]
 
     def _setup_font(self):
         """日本語フォントの設定"""
         # プロジェクト内フォントを最優先
-        font_paths = [
-            './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
-            'dataset/fonts/ipag.ttf',     # 相対パス別パターン
-            '~/Library/Fonts/ipag.ttf',
-            '/Library/Fonts/ipag.ttf',
-            '~/Library/Fonts/IPAGothic.ttc',
-            '/System/Library/Fonts/Hiragino Sans GB.ttc',
+        font_configs = [
+            ('./dataset/fonts/ipag.ttf', 'IPAGothic'),
+            ('dataset/fonts/ipag.ttf', 'IPAGothic'),
+            ('~/Library/Fonts/ipag.ttf', 'IPAGothic'),
+            ('/Library/Fonts/ipag.ttf', 'IPAGothic'),
+            ('~/Library/Fonts/IPAGothic.ttc', 'IPAGothic'),
+            ('/System/Library/Fonts/Hiragino Sans GB.ttc', 'Hiragino Sans GB'),
         ]
         
-        for path in font_paths:
+        for path, family_name in font_configs:
             expanded_path = os.path.expanduser(path)
             if os.path.exists(expanded_path):
                 fm.fontManager.addfont(expanded_path)
-                return expanded_path
+                return family_name  # フォントファミリー名を返す
         return None
 
     # ... (Keep existing methods until plot_analysis) ...
@@ -109,11 +109,11 @@ class SupplyDemandAnalyzer:
         plt.subplots_adjust(left=0.03, right=0.98, top=0.95, bottom=0.05, wspace=0.3, hspace=0.6)
         
         # Fonts (Scaled up for full page visibility)
-        fp = fm.FontProperties(fname=self.font_path, size=16) if self.font_path else None
-        fp_bold = fm.FontProperties(fname=self.font_path, weight='bold', size=16) if self.font_path else None
-        fp_title = fm.FontProperties(fname=self.font_path, weight='bold', size=20) if self.font_path else None
-        fp_small = fm.FontProperties(fname=self.font_path, size=12) if self.font_path else None
-        fp_num = fm.FontProperties(fname=self.font_path, size=20, weight='bold') if self.font_path else None
+        fp = fm.FontProperties(family=self.font_family, size=16) if self.font_family else None
+        fp_bold = fm.FontProperties(family=self.font_family, weight='bold', size=16) if self.font_family else None
+        fp_title = fm.FontProperties(family=self.font_family, weight='bold', size=20) if self.font_family else None
+        fp_small = fm.FontProperties(family=self.font_family, size=12) if self.font_family else None
+        fp_num = fm.FontProperties(family=self.font_family, size=20, weight='bold') if self.font_family else None
         
         # === ROW 1: Charts (Height: 0-9) ===
         
