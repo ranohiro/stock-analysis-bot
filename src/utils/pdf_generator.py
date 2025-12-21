@@ -20,8 +20,18 @@ ACCENT_BLUE = colors.HexColor('#2f81f7')
 ACCENT_RED = colors.HexColor('#da3633')
 ACCENT_GOLD = colors.HexColor('#d29922')
 
+# グローバル変数でフォント登録状態をキャッシュ
+_FONT_REGISTERED = False
+_FONT_AVAILABLE = False
+
 def setup_japanese_font():
-    """日本語フォントの設定"""
+    """日本語フォントの設定（キャッシュ付き）"""
+    global _FONT_REGISTERED, _FONT_AVAILABLE
+    
+    # すでに登録済みならすぐに返す（2回目以降はブロックしない）
+    if _FONT_REGISTERED:
+        return _FONT_AVAILABLE
+    
     # プロジェクト内フォントを最優先、次にユーザー環境、最後にLinuxシステムフォント
     font_paths = [
         './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
@@ -39,9 +49,17 @@ def setup_japanese_font():
                 pdfmetrics.registerFont(TTFont('Japanese', expanded_path))
                 # Boldがない場合はNormalを代用（ReportLabは自動で太字化しないため、本来は別ファイルが必要だが、今回は代用）
                 pdfmetrics.registerFont(TTFont('JapaneseBold', expanded_path)) 
+                _FONT_REGISTERED = True
+                _FONT_AVAILABLE = True
+                print(f"[PDF] Japanese font registered: {path}")
                 return True
-            except:
+            except Exception as e:
+                print(f"[PDF] Font registration failed for {path}: {e}")
                 continue
+    
+    _FONT_REGISTERED = True
+    _FONT_AVAILABLE = False
+    print("[PDF] No Japanese font available, using default")
     return False
 
 def on_page(canvas, doc):
