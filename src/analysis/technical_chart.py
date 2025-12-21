@@ -10,35 +10,37 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 import numpy as np
 
-# グローバルにフォントパスを設定
-FONT_PATH = None
+# グローバルにフォントファミリー名を設定
+FONT_FAMILY = None
 
 def setup_japanese_font_for_chart():
     """チャートで使用する日本語フォントを設定"""
-    global FONT_PATH
+    global FONT_FAMILY
     
     try:
         # プロジェクト内フォントを最優先、次にシステムフォント
-        font_paths = [
-            './dataset/fonts/ipag.ttf',  # プロジェクト内（最優先）
-            'dataset/fonts/ipag.ttf',     # 相対パス別パターン
-            '~/Library/Fonts/ipag.ttf',
-            '/Library/Fonts/ipag.ttf',
-            '~/Library/Fonts/IPAGothic.ttc',
-            '/Library/Fonts/IPAGothic.ttc',
-            '/usr/share/fonts/ipa-gothic/ipag.ttf',  # Linux
+        font_configs = [
+            ('./dataset/fonts/ipag.ttf', 'IPAGothic'),
+            ('dataset/fonts/ipag.ttf', 'IPAGothic'),
+            ('~/Library/Fonts/ipag.ttf', 'IPAGothic'),
+            ('/Library/Fonts/ipag.ttf', 'IPAGothic'),
+            ('~/Library/Fonts/IPAGothic.ttc', 'IPAGothic'),
+            ('/Library/Fonts/IPAGothic.ttc', 'IPAGothic'),
+            ('/usr/share/fonts/ipa-gothic/ipag.ttf', 'IPAGothic'),
         ]
         
-        for font_path in font_paths:
+        for font_path, family_name in font_configs:
             expanded_path = os.path.expanduser(font_path)
             if os.path.exists(expanded_path):
-                FONT_PATH = expanded_path
+                fm.fontManager.addfont(expanded_path)
+                FONT_FAMILY = family_name
                 
                 # matplotlibのデフォルト設定
-                plt.rcParams['axes.unicode_minus'] = False  # マイナス記号の文字化け防止
+                plt.rcParams['axes.unicode_minus'] = False
+                plt.rcParams['font.sans-serif'] = [family_name]
                 
                 print(f"✅ チャートフォント設定成功: {font_path}")
-                return expanded_path
+                return family_name
         
         print("⚠️  IPAフォントが見つかりません。デフォルトフォントを使用します。")
     except Exception as e:
@@ -54,11 +56,7 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
     """
     
     # 日本語フォント設定
-    # ユーザー環境にある ipag.ttf を優先
-    font_path = os.path.expanduser('~/Library/Fonts/ipag.ttf')
-    if not os.path.exists(font_path):
-        # フォールバック
-        font_path = setup_japanese_font_for_chart()
+    font_family = setup_japanese_font_for_chart()
 
     # Column normalization for mplfinance
     rename_map = {
@@ -138,10 +136,8 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
         'grid.color': '#30363d'
     }
     
-    if font_path and os.path.exists(font_path):
-        # mplfinance/matplotlib sometimes needs just the font family name
-        prop = fm.FontProperties(fname=font_path)
-        rc_params['font.family'] = prop.get_name()
+    if font_family:
+        rc_params['font.sans-serif'] = [font_family]
     
     s = mpf.make_mpf_style(
         base_mpf_style='nightclouds', # Dark base
@@ -201,7 +197,7 @@ def generate_charts(data: pd.DataFrame, code: str, financial_data: pd.DataFrame 
     
     # メインパネル (0)
     ax_main = axes[0]
-    fp_mx = fm.FontProperties(fname=font_path, size=16) if font_path else None
+    fp_mx = fm.FontProperties(family=font_family, size=16) if font_family else None
     
     # Rotation 0 (Horizontal)
     # y=1.02 moves it above the axis, or y=0.5 moves it to center side.
