@@ -63,8 +63,10 @@ def run_bot():
         print(f"❌ 予期せぬエラー: {e}")
 
 if __name__ == "__main__":
-    # 1. 起動時にデータを最新化
-    update_data()
+    # メモリ制約対策: 起動時のデータ更新を無効化
+    # データ更新は run_batch_update.sh で定期実行されます
+    print("[INFO] Skipping data update on startup to save memory")
+    print("[INFO] Use run_batch_update.sh for manual data updates")
     
-    # 2. Botを起動 (常駐)
+    # Bot起動（常駐）
     run_bot()
