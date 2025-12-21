@@ -298,7 +298,7 @@ class SupplyDemandAnalyzer:
         # Format: (Label, Value+Unit, Key, ScoreKey)
         items_left = [
             ("信用倍率", fmt_val_normal(m['margin_ratio'], "倍", 'margin_ratio'), 'margin_ratio'),
-            ("信用残売買高レシピ", fmt_val_normal(m['days_to_cover'], "日", 'days_to_cover'), 'days_to_cover'),
+            ("信用残売買高レシオ", fmt_val_normal(m['days_to_cover'], "日", 'days_to_cover'), 'days_to_cover'),
             ("回転率", fmt_val_normal(m['turnover_rate'], "%", 'turnover_rate'), 'turnover_rate'),
             (f"【{ind_name}】 騰落率", fmt_val_normal(m['sector_return'], "%", 'sector_return'), 'sector_return'),
             (f"【{ind_name}】 5日/20日売買代金", fmt_flow_val(m['sector_flow_ratio'], "倍", 'sector_flow_ratio', 'sector_flow_consecutive'), 'sector_flow_ratio'),
